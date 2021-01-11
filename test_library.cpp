@@ -4,7 +4,7 @@
 #include <iostream>
 
 int main(){
-    int res = addOne(5);
+    int res = farm(addOne);
     printf("%d\n", res);
 	
     return 0;
