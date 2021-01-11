@@ -1,6 +1,12 @@
 // test_library.cpp
 
-#include "library.h"
+#include "src/library.h"
 #include <iostream>
 
-printf("%d", addOne(5));
+int main(){
+    int res = addOne(5);
+    printf("%d\n", res);
+	
+    return 0;
+}
+

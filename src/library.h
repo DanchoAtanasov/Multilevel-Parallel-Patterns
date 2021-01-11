@@ -1,4 +1,4 @@
 // library.h
 
-void addOne(int number);
+int addOne(int number);
 

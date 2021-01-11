@@ -1,6 +1,8 @@
 // library.cpp
 
-void addOne(int number){
-	return number + 1
-{
+#include "library.h"
+
+int addOne(int number){
+    return number + 1;
+}
 
