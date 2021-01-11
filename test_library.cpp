@@ -4,7 +4,8 @@
 #include <iostream>
 
 int main(){
-    int res = farm(addOne);
+    int arr[5] = { 1, 2, 3, 4, 5 };
+    int res = farm(addOne, 5, arr);
     printf("%d\n", res);
 	
     return 0;
