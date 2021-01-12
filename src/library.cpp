@@ -19,6 +19,11 @@ int addOne(int number){
     return number + 1;
 }
 
+int addTwo(int number){
+    printf("Adding two to %d\n", number);
+    return number + 2;
+}
+
 void* work(void* threadarg) {
     thread_data* my_data;
     my_data = (thread_data*)threadarg;
