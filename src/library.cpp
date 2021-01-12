@@ -8,7 +8,7 @@
 
 typedef struct thread_data_ {
     int thread_id;
-    int number;
+    int number; // void * args or templates
     int (*worker)(int);
 } thread_data;
 
