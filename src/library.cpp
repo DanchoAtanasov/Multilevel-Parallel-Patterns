@@ -22,8 +22,10 @@ int farm(int (*worker)(int), int arr_len, int* input_arr) {
     pthread_attr_init(&attr);
     pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
 
+    int rc;
+
     for (int t = 0; t < NUM_THREADS; t++) {
-        rc = pthread_create(&threads[t], &attr, worker, NULL);
+        rc = pthread_create(&threads[t], &attr, (void *(*)(void *))worker, NULL);
         if (rc) {
             printf("ERROR; return code from pthread_create() is %d\n", rc);
             exit(-1);
@@ -32,7 +34,7 @@ int farm(int (*worker)(int), int arr_len, int* input_arr) {
 
     pthread_attr_destroy(&attr);
 
-    for (t = 0; t < NUM_THREADS; t++) {
+    for (int t = 0; t < NUM_THREADS; t++) {
         rc = pthread_join(threads[t], NULL);
         if (rc) {
             printf("ERROR; return code from pthread_join() is %d\n", rc);
@@ -44,7 +46,7 @@ int farm(int (*worker)(int), int arr_len, int* input_arr) {
     /* Last thing that main() should do */
     pthread_exit(NULL);
 
-    return 1
+    return 1;
     //return EXIT_SUCCESS;
     
     /*int result[arr_len];
