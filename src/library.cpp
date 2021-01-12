@@ -75,7 +75,7 @@ int farm(int (*worker)(int), int arr_len, int* input_arr) {
     }
 
     /* Last thing that main() should do */
-    pthread_exit(NULL);
+    //pthread_exit(NULL);
 
     return 1;
     //return EXIT_SUCCESS;

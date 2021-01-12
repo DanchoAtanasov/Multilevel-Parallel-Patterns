@@ -6,8 +6,12 @@
 int main(){
     printf("Start of main\n");
     int arr[5] = { 1, 2, 3, 4, 5 };
-    int res = farm(addTwo, 5, arr);
+    int res = farm(addOne, 5, arr);
+    printf("Between both function calls\n");
 
+    res = farm(addTwo, 5, arr);
+    printf("End of main\n");
+    
     return 0;
 }
 
