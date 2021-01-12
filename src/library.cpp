@@ -9,6 +9,7 @@
 typedef struct thread_data_ {
     int thread_id;
     int number;
+    int (*worker)(int);
 } thread_data;
 
 thread_data thread_data_array[NUM_THREADS];
@@ -23,9 +24,10 @@ void* work(void* threadarg) {
     my_data = (thread_data*)threadarg;
     int tid = my_data->thread_id;
     int number = my_data->number;
+    int (*worker)(int) = my_data->worker;
     printf("Working thread: %d, number: %d\n", tid, number);
 
-    int res = addOne(number);
+    int res = (*worker)(number);
 
     printf("Thread %ld done with res: %d.\n", tid, res);
     pthread_exit(NULL);
@@ -47,6 +49,7 @@ int farm(int (*worker)(int), int arr_len, int* input_arr) {
     for (int t = 0; t < NUM_THREADS; t++) {
         thread_data_array[t].thread_id = t;
         thread_data_array[t].number = input_arr[t];
+        thread_data_array[t].worker = worker;
         rc = pthread_create(&threads[t], &attr, work, (void*)&thread_data_array[t]);
         //rc = pthread_create(&threads[t], &attr, (void* (*)(void*))worker, NULL);
         if (rc) {
