@@ -6,9 +6,29 @@
 
 #define NUM_THREADS 5
 
+typedef struct thread_data_ {
+    int thread_id;
+    int number;
+} thread_data;
+
+thread_data thread_data_array[NUM_THREADS];
+
 int addOne(int number){
     printf("Adding one to %d\n", number);
     return number + 1;
+}
+
+void* work(void* threadarg) {
+    thread_data* my_data;
+    my_data = (thread_data*)threadarg;
+    int tid = my_data->thread_id;
+    int number = my_data->number;
+    printf("Working thread: %d, number: %d\n", tid, number);
+
+    int res = addOne(number);
+
+    printf("Thread %ld done with res: %d.\n", tid, res);
+    pthread_exit(NULL);
 }
 
 int farm(int (*worker)(int), int arr_len, int* input_arr) {
@@ -25,7 +45,10 @@ int farm(int (*worker)(int), int arr_len, int* input_arr) {
     int rc;
 
     for (int t = 0; t < NUM_THREADS; t++) {
-        rc = pthread_create(&threads[t], &attr, (void *(*)(void *))worker, NULL);
+        thread_data_array[t].thread_id = t;
+        thread_data_array[t].number = input_arr[t];
+        rc = pthread_create(&threads[t], &attr, work, (void*)&thread_data_array[t]);
+        //rc = pthread_create(&threads[t], &attr, (void* (*)(void*))worker, NULL);
         if (rc) {
             printf("ERROR; return code from pthread_create() is %d\n", rc);
             exit(-1);
