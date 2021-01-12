@@ -14,16 +14,20 @@ typedef struct thread_data_ {
 
 thread_data thread_data_array[NUM_THREADS];
 
+// Placeholder function for testing
 int addOne(int number){
     printf("Adding one to %d\n", number);
     return number + 1;
 }
 
+// Placeholder function for testing
 int addTwo(int number){
     printf("Adding two to %d\n", number);
     return number + 2;
 }
 
+// Work function that is called on separate threads
+// Calls the provided worker function with the processeed arguments 
 void* work(void* threadarg) {
     thread_data* my_data;
     my_data = (thread_data*)threadarg;
@@ -38,25 +42,26 @@ void* work(void* threadarg) {
     pthread_exit(NULL);
 }
 
+// Farm function that calls 'worker' function on 'input_array' with length 'arr_len'
 int farm(int (*worker)(int), int arr_len, int* input_arr) {
     printf("In farm\n");
     //int * result = (int*)malloc(arr_len * sizeof(int));
+    //free(result)
     
+    /* Initialize array of threads*/
     pthread_t threads[NUM_THREADS];
-    pthread_attr_t attr;
 
     /* Initialize and set thread detached attribute */
+    pthread_attr_t attr;
     pthread_attr_init(&attr);
     pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
 
     int rc;
-
     for (int t = 0; t < NUM_THREADS; t++) {
         thread_data_array[t].thread_id = t;
         thread_data_array[t].number = input_arr[t];
         thread_data_array[t].worker = worker;
         rc = pthread_create(&threads[t], &attr, work, (void*)&thread_data_array[t]);
-        //rc = pthread_create(&threads[t], &attr, (void* (*)(void*))worker, NULL);
         if (rc) {
             printf("ERROR; return code from pthread_create() is %d\n", rc);
             exit(-1);
@@ -75,21 +80,8 @@ int farm(int (*worker)(int), int arr_len, int* input_arr) {
     }
 
     /* Last thing that main() should do */
-    //pthread_exit(NULL);
+    //pthread_exit(NULL);  // TODO put this in main
 
-    return 1;
-    //return EXIT_SUCCESS;
-    
-    /*int result[arr_len];
-    for (int i = 0; i < arr_len; i++) {
-        result[i] = (*worker)(input_arr[i]);
-    }
-    for (int i = 0; i < arr_len; i++) {
-        printf("%d ", result[i]);
-    }
-    printf("\n");
-    //free(result);
-
-    return 1;*/
+    return 1;  // TODO Change the return type
 }
 
