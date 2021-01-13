@@ -7,9 +7,7 @@
 int main(){
     printf("Start of main\n");
 
-    f<double>(1);
-
-    /*int arr[5] = { 1, 2, 3, 4, 5 };
+    int arr[5] = { 1, 2, 3, 4, 5 };
     int res = farm<int>(addOne, 5, arr, 5);
     printf("--------------------------------\n");
 
@@ -20,8 +18,6 @@ int main(){
     int arr3[5] = { 'a', 'b', 'c', 'd', 'f' };
     res = farm<char>(addChar, 5, arr3);
     printf("--------------------------------\n");
-
-    */
 
     printf("End of main\n");
     

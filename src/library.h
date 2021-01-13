@@ -7,16 +7,12 @@
 
 const int MAX_THREADS = 16;
 
+// Declarations
 int addOne(int number);
 int addTwo(int number);
 char addChar(char character);
 
 template<typename T> int farm(T (*worker)(T), int arr_len, int* input_arr, int NUM_THREADS = MAX_THREADS);
-
-template<typename T>
-void f(T s) {
-    printf("Bla Bla");
-}
 
 template<typename T>
 struct thread_data {
@@ -25,6 +21,7 @@ struct thread_data {
     T(*worker)(T);
 };
 
+// Definitions
 // Placeholder function for testing
 int addOne(int number) {
     printf("Adding one to %d\n", number);
@@ -111,6 +108,5 @@ int farm(T(*worker)(T), int arr_len, int* input_arr, int NUM_THREADS) {
 
     return 1;  // TODO Change the return type
 }
-
 
 #endif
