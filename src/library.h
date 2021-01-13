@@ -11,6 +11,7 @@ const int MAX_THREADS = 16;
 int addOne(int number);
 int addTwo(int number);
 char addChar(char character);
+int add2Args(int x, int y);
 
 template<typename T> int farm(T (*worker)(T), int arr_len, int* input_arr, int NUM_THREADS = MAX_THREADS);
 
@@ -20,6 +21,15 @@ struct thread_data {
     T number; // void * args or templates
     T(*worker)(T);
 };
+
+template<typename... Args>
+int foo(Args... a) {
+    return foo2(a);
+}
+
+int foo2(int x, int y) {
+    return x + y;
+}
 
 // Definitions
 // Placeholder function for testing
@@ -38,6 +48,11 @@ int addTwo(int number) {
 char addChar(char character) {
     printf("Adding char to %c\n", character);
     return character;
+}
+
+int add2Args(int x, int y) {
+    printf("Adding with 2 args %d + %d: \n", x, y);
+    return x + y;
 }
 
 // worker_wrapper function that is called on separate threads
