@@ -7,11 +7,12 @@
 //#define NUM_THREADS 5
 //#define MAX_THREADS 16
 
-typedef struct thread_data_ {
+template<typename T>
+struct thread_data {
     int thread_id;
-    int number; // void * args or templates
-    int (*worker)(int);
-} thread_data;
+    T number; // void * args or templates
+    T (*worker)(T);
+};
 
 // Placeholder function for testing
 int addOne(int number){
@@ -48,7 +49,8 @@ void* worker_wrapper(void* threadarg) {
 }
 
 // Farm function that calls 'worker' function on 'input_array' with length 'arr_len'
-int farm(int (*worker)(int), int arr_len, int* input_arr, int NUM_THREADS) {
+template<typename T>
+int farm(T (*worker)(T), int arr_len, int* input_arr, int NUM_THREADS) {
     printf("In farm\n");
     //int * result = (int*)malloc(arr_len * sizeof(int));
     //free(result)
@@ -62,7 +64,7 @@ int farm(int (*worker)(int), int arr_len, int* input_arr, int NUM_THREADS) {
     pthread_t threads[NUM_THREADS];
 
     /* Initialize thread_data_array */
-    thread_data thread_data_array[NUM_THREADS];
+    thread_data<T> thread_data_array[NUM_THREADS];
 
     /* Initialize and set thread detached attribute */
     pthread_attr_t attr;
