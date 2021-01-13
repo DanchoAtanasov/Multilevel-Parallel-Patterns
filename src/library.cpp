@@ -25,6 +25,12 @@ int addTwo(int number){
     return number + 2;
 }
 
+// Placeholder function for testing
+char addChar(char character) {
+    printf("Adding char to %c\n", character);
+    return character;
+}
+
 // worker_wrapper function that is called on separate threads
 // Calls the provided worker function with the processeed arguments 
 void* worker_wrapper(void* threadarg) {
