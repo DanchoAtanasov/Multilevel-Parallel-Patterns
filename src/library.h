@@ -22,14 +22,19 @@ struct thread_data {
     T(*worker)(T);
 };
 
-template<typename... Args>
-int foo(Args... a) {
-    return foo2(a);
-}
-
 int foo2(int x, int y) {
     return x + y;
 }
+int foo2(int x, float y) {
+    printf("Here instead");
+    return x + y;
+}
+
+template<typename... Args>
+int foo(Args... a) {
+    return foo2(a...);
+}
+
 
 // Definitions
 // Placeholder function for testing
