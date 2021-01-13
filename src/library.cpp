@@ -34,12 +34,13 @@ char addChar(char character) {
 
 // worker_wrapper function that is called on separate threads
 // Calls the provided worker function with the processeed arguments 
+template<typename T>
 void* worker_wrapper(void* threadarg) {
     thread_data* my_data;
-    my_data = (thread_data*)threadarg;
+    my_data = (thread_data*)<T> threadarg;
     int tid = my_data->thread_id;
-    int number = my_data->number;
-    int (*worker)(int) = my_data->worker;
+    T number = my_data->number;
+    T (*worker)(T) = my_data->worker;
     printf("Working thread: %d, number: %d\n", tid, number);
 
     int res = (*worker)(number);

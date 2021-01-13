@@ -6,4 +6,4 @@ int addOne(int number);
 int addTwo(int number);
 char addChar(char character);
 
-int farm(int (*worker)(int), int arr_len, int* input_arr, int NUM_THREADS = MAX_THREADS);
+template<typename T> int farm(T (*worker)(T), int arr_len, int* input_arr, int NUM_THREADS = MAX_THREADS);
