@@ -10,7 +10,8 @@ int main(){
     int res = farm(addOne, 5, arr, 5);
     printf("Between both function calls\n");
 
-    res = farm(addTwo, 5, arr, 5);
+    int arr2[7] = { 1, 2, 3, 4, 5, 6, 7 };
+    res = farm(addTwo, 7, arr);
     printf("End of main\n");
     
     return 0;
