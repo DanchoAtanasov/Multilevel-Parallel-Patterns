@@ -85,7 +85,7 @@ int farm(T(*worker)(T), int arr_len, int* input_arr, int NUM_THREADS) {
         thread_data_array[t].thread_id = t;
         thread_data_array[t].number = input_arr[t];
         thread_data_array[t].worker = worker;
-        rc = pthread_create(&threads[t], &attr, worker_wrapper, (void*)&thread_data_array[t]);
+        rc = pthread_create(&threads[t], &attr, worker_wrapper<T>, (void*)&thread_data_array[t]);
         if (rc) {
             printf("ERROR; return code from pthread_create() is %d\n", rc);
             exit(-1);
