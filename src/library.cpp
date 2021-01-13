@@ -4,15 +4,14 @@
 #include <iostream>
 #include <pthread.h>
 
-#define NUM_THREADS 5
+//#define NUM_THREADS 5
+#define MAX_THREADS 16
 
 typedef struct thread_data_ {
     int thread_id;
     int number; // void * args or templates
     int (*worker)(int);
 } thread_data;
-
-thread_data thread_data_array[NUM_THREADS];
 
 // Placeholder function for testing
 int addOne(int number){
@@ -26,9 +25,9 @@ int addTwo(int number){
     return number + 2;
 }
 
-// Work function that is called on separate threads
+// worker_wrapper function that is called on separate threads
 // Calls the provided worker function with the processeed arguments 
-void* work(void* threadarg) {
+void* worker_wrapper(void* threadarg) {
     thread_data* my_data;
     my_data = (thread_data*)threadarg;
     int tid = my_data->thread_id;
@@ -43,13 +42,16 @@ void* work(void* threadarg) {
 }
 
 // Farm function that calls 'worker' function on 'input_array' with length 'arr_len'
-int farm(int (*worker)(int), int arr_len, int* input_arr) {
+int farm(int (*worker)(int), int arr_len, int* input_arr, const int NUM_THREADS = MAX_THREADS) {
     printf("In farm\n");
     //int * result = (int*)malloc(arr_len * sizeof(int));
     //free(result)
     
-    /* Initialize array of threads*/
+    /* Initialize array of threads */
     pthread_t threads[NUM_THREADS];
+
+    /* Initialize thread_data_array */
+    thread_data thread_data_array[NUM_THREADS];
 
     /* Initialize and set thread detached attribute */
     pthread_attr_t attr;
@@ -61,7 +63,7 @@ int farm(int (*worker)(int), int arr_len, int* input_arr) {
         thread_data_array[t].thread_id = t;
         thread_data_array[t].number = input_arr[t];
         thread_data_array[t].worker = worker;
-        rc = pthread_create(&threads[t], &attr, work, (void*)&thread_data_array[t]);
+        rc = pthread_create(&threads[t], &attr, worker_wrapper, (void*)&thread_data_array[t]);
         if (rc) {
             printf("ERROR; return code from pthread_create() is %d\n", rc);
             exit(-1);
