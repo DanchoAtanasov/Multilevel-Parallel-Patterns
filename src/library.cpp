@@ -7,10 +7,10 @@
 //#define NUM_THREADS 5
 //#define MAX_THREADS 16
 
-template<typename T>
+/*template<typename T>
 void f(T s){
     printf("Bla Bla");
-}
+} */
 
 template<typename T>
 struct thread_data {
