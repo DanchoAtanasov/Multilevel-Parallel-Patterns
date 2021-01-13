@@ -5,7 +5,7 @@
 #include <pthread.h>
 
 //#define NUM_THREADS 5
-#define MAX_THREADS 16
+//#define MAX_THREADS 16
 
 typedef struct thread_data_ {
     int thread_id;
@@ -42,13 +42,15 @@ void* worker_wrapper(void* threadarg) {
 }
 
 // Farm function that calls 'worker' function on 'input_array' with length 'arr_len'
-int farm(int (*worker)(int), int arr_len, int* input_arr, int NUM_THREADS = MAX_THREADS) {
+int farm(int (*worker)(int), int arr_len, int* input_arr, int NUM_THREADS) {
     printf("In farm\n");
     //int * result = (int*)malloc(arr_len * sizeof(int));
     //free(result)
 
     // If there are more threads requested than the array_lenght reduce threads
     if (NUM_THREADS > arr_len) NUM_THREADS = arr_len;
+
+    printf("NUM_THREADS: %d\n", NUM_THREADS);
     
     /* Initialize array of threads */
     pthread_t threads[NUM_THREADS];
