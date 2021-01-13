@@ -15,11 +15,12 @@ int add2Args(int x, int y);
 
 template<typename T> int farm(T (*worker)(T), int arr_len, int* input_arr, int NUM_THREADS = MAX_THREADS);
 
-template<typename T>
+template<typename R, typename... Args>
 struct thread_data {
     int thread_id;
-    T number; // void * args or templates
-    T(*worker)(T);
+    Args args;
+    //T number; // void * args or templates
+    R(*worker)(Args);
 };
 
 int foo2(int x, int y) {
@@ -62,24 +63,25 @@ int add2Args(int x, int y) {
 
 // worker_wrapper function that is called on separate threads
 // Calls the provided worker function with the processeed arguments 
-template<typename T>
+template<typename... Args>
 void* worker_wrapper(void* threadarg) {
-    thread_data<T>* my_data;
-    my_data = (thread_data<T>*) threadarg;
+    thread_data<Args...>* my_data;
+    my_data = (thread_data<Args...>*) threadarg;
     int tid = my_data->thread_id;
-    T number = my_data->number;
-    T(*worker)(T) = my_data->worker;
+    Args args = my_data->args;
+    //T number = my_data->number;
+    R(*worker)(Args...) = my_data->worker;
     printf("Working thread: %d, number: %d\n", tid, number);
 
-    int res = (*worker)(number);
+    int res = (*worker)(args);
 
     printf("Thread %ld done with res: %d.\n", tid, res);
     pthread_exit(NULL);
 }
 
 // Farm function that calls 'worker' function on 'input_array' with length 'arr_len'
-template<typename T>
-int farm(T(*worker)(T), int arr_len, int* input_arr, int NUM_THREADS) {
+template<typename R, typename ...Args>
+int farm(R(*worker)(Args... a), int arr_len, int* input_arr, int NUM_THREADS) {
     printf("In farm\n");
     //int * result = (int*)malloc(arr_len * sizeof(int));
     //free(result)
@@ -93,7 +95,7 @@ int farm(T(*worker)(T), int arr_len, int* input_arr, int NUM_THREADS) {
     pthread_t threads[NUM_THREADS];
 
     /* Initialize thread_data_array */
-    thread_data<T> thread_data_array[NUM_THREADS];
+    thread_data<R, Args...> thread_data_array[NUM_THREADS];
 
     /* Initialize and set thread detached attribute */
     pthread_attr_t attr;
@@ -103,9 +105,10 @@ int farm(T(*worker)(T), int arr_len, int* input_arr, int NUM_THREADS) {
     int rc;
     for (int t = 0; t < NUM_THREADS; t++) {
         thread_data_array[t].thread_id = t;
-        thread_data_array[t].number = input_arr[t];
+        thread_data_array[t].args = a...;
+        //thread_data_array[t].number = input_arr[t];
         thread_data_array[t].worker = worker;
-        rc = pthread_create(&threads[t], &attr, worker_wrapper<T>, (void*)&thread_data_array[t]);
+        rc = pthread_create(&threads[t], &attr, worker_wrapper<Args...>, (void*)&thread_data_array[t]);
         if (rc) {
             printf("ERROR; return code from pthread_create() is %d\n", rc);
             exit(-1);

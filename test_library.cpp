@@ -19,7 +19,11 @@ int main(){
     res = farm<char>(addChar, 5, arr3);
     printf("--------------------------------\n");*/
 
-    printf("%d\n", foo(3, 5.5f));
+    //printf("%d\n", foo(3, 5.5f));
+
+    int arr4[5] = { 1, 2, 3, 4, 5 };
+    res = farm<int, int, int>(add2Args, 5, arr4);
+    printf("--------------------------------\n");
 
     printf("End of main\n");
     
