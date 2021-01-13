@@ -8,6 +8,11 @@
 //#define MAX_THREADS 16
 
 template<typename T>
+void f(T s){
+    printf("Bla Bla");
+}
+
+template<typename T>
 struct thread_data {
     int thread_id;
     T number; // void * args or templates
@@ -36,8 +41,8 @@ char addChar(char character) {
 // Calls the provided worker function with the processeed arguments 
 template<typename T>
 void* worker_wrapper(void* threadarg) {
-    thread_data* my_data;
-    my_data = (thread_data*)<T> threadarg;
+    thread_data<T>* my_data;
+    my_data = (thread_data<T>*) threadarg;
     int tid = my_data->thread_id;
     T number = my_data->number;
     T (*worker)(T) = my_data->worker;
