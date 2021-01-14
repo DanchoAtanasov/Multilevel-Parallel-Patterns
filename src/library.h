@@ -8,12 +8,13 @@
 const int MAX_THREADS = 16;
 
 // Declarations
-int addOne(int number);
+/*int addOne(int number);
 int addTwo(int number);
 char addChar(char character);
-int add2Args(int x, int y);
+int add2Args(int x, int y);*/
 
-template<typename T> int farm(T (*worker)(T), int arr_len, int* input_arr, int NUM_THREADS = MAX_THREADS);
+template<typename R, typename... Args> int farm(int NUM_THREADS, int* arr, int arr_len, R(*worker)(Args...), Args... a);
+//template<typename T> int farm(T (*worker)(T), int arr_len, int* input_arr, int NUM_THREADS = MAX_THREADS);
 
 template<typename R, typename... Args>
 struct thread_data {
@@ -23,62 +24,20 @@ struct thread_data {
     R(*worker)(Args...);
 };
 
-int foo2(int x, int y) {
-    printf("In foo2, %d, %d\n", x, y);
-    return x + y;
-}
-int foo2(int x, int y, int z) {
-    printf("In foo2 with z, %d, %d, %d\n", x, y, z);
-    return x + y + z;
-}
-int foo2(int x, float y) {
-    printf("Here instead\n");
-    return x + y;
-}
-
-template<typename... Args>
-int foo(Args... a) {
-    //printf("YEAH %c", a...);
-    //Args... n = a...;
-	std::size_t s = sizeof...(Args);
-
-    std::cout << s << std::endl;
-    return foo2(a...);
-}
-
 template<typename R, typename... Args>
 int wfoo(int NUM_THREADS, int* arr, int arr_len, R(*worker)(Args...), Args... a){
     printf("WFOO with num args: %d\n", sizeof...(Args));
     printf("NUM_THREADS: %d, arr_len: %d\n", NUM_THREADS, arr_len);
+
+    thread_data<R, Args...> thread_data;
+    // Experiment here
+
     int res = (*worker)(a...);
     printf("res is %d\n", res);
     return 1;
 }
-
 /*
 // Definitions
-// Placeholder function for testing
-int addOne(int number) {
-    printf("Adding one to %d\n", number);
-    return number + 1;
-}
-
-// Placeholder function for testing
-int addTwo(int number) {
-    printf("Adding two to %d\n", number);
-    return number + 2;
-}
-
-// Placeholder function for testing
-char addChar(char character) {
-    printf("Adding char to %c\n", character);
-    return character;
-}
-
-int add2Args(int x, int y) {
-    printf("Adding with 2 args %d + %d: \n", x, y);
-    return x + y;
-}
 
 // worker_wrapper function that is called on separate threads
 // Calls the provided worker function with the processeed arguments 
@@ -99,9 +58,11 @@ void* worker_wrapper(void* threadarg) {
 }
 
 // Farm function that calls 'worker' function on 'input_array' with length 'arr_len'
-template<typename R, typename ...Args>
-int farm(R(*worker)(Args... a), int arr_len, int* input_arr, int NUM_THREADS) {
-    printf("In farm\n");
+template<typename R, typename... Args>
+int farm(int NUM_THREADS, int* arr, int arr_len, R(*worker)(Args...), Args... a) {
+    printf("In farm with num args: %d\n", sizeof...(Args));
+    printf("NUM_THREADS: %d, arr_len: %d\n", NUM_THREADS, arr_len);
+
     //int * result = (int*)malloc(arr_len * sizeof(int));
     //free(result)
 

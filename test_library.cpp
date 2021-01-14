@@ -7,6 +7,30 @@ int myfoo(int a, int b, int c){
     return a - b + c;
 }
 
+// Placeholder function for testing
+int addOne(int number) {
+    printf("Adding one to %d\n", number);
+    return number + 1;
+}
+
+// Placeholder function for testing
+int addTwo(int number) {
+    printf("Adding two to %d\n", number);
+    return number + 2;
+}
+
+// Placeholder function for testing
+char addChar(char character) {
+    printf("Adding char to %c\n", character);
+    return character;
+}
+
+// Placeholder function for testing
+int add2Args(int x, int y) {
+    printf("Adding with 2 args %d + %d: \n", x, y);
+    return x + y;
+}
+
 int main(){
     printf("Start of main\n");
 
