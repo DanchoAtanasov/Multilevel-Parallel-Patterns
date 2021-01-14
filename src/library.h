@@ -18,9 +18,9 @@ template<typename T> int farm(T (*worker)(T), int arr_len, int* input_arr, int N
 template<typename R, typename... Args>
 struct thread_data {
     int thread_id;
-    Args args;
+    //Args args;
     //T number; // void * args or templates
-    R(*worker)(Args);
+    R(*worker)(Args...);
 };
 
 int foo2(int x, int y) {
@@ -63,17 +63,17 @@ int add2Args(int x, int y) {
 
 // worker_wrapper function that is called on separate threads
 // Calls the provided worker function with the processeed arguments 
-template<typename... Args>
+template<typename R, typename... Args>
 void* worker_wrapper(void* threadarg) {
     thread_data<Args...>* my_data;
     my_data = (thread_data<Args...>*) threadarg;
     int tid = my_data->thread_id;
-    Args args = my_data->args;
+    //Args args = my_data->args;
     //T number = my_data->number;
     R(*worker)(Args...) = my_data->worker;
-    printf("Working thread: %d, number: %d\n", tid, number);
+    printf("Working thread: %d\n", tid);
 
-    int res = (*worker)(args);
+    int res = (*worker)(Args...);
 
     printf("Thread %ld done with res: %d.\n", tid, res);
     pthread_exit(NULL);
@@ -108,7 +108,7 @@ int farm(R(*worker)(Args... a), int arr_len, int* input_arr, int NUM_THREADS) {
         thread_data_array[t].args = a...;
         //thread_data_array[t].number = input_arr[t];
         thread_data_array[t].worker = worker;
-        rc = pthread_create(&threads[t], &attr, worker_wrapper<Args...>, (void*)&thread_data_array[t]);
+        rc = pthread_create(&threads[t], &attr, worker_wrapper<R, Args...>, (void*)&thread_data_array[t]);
         if (rc) {
             printf("ERROR; return code from pthread_create() is %d\n", rc);
             exit(-1);
