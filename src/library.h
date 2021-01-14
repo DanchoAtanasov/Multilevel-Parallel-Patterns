@@ -24,19 +24,38 @@ struct thread_data {
 };
 
 int foo2(int x, int y) {
+    printf("In foo2, %d, %d\n", x, y);
     return x + y;
 }
+int foo2(int x, int y, int z) {
+    printf("In foo2 with z, %d, %d, %d\n", x, y, z);
+    return x + y + z;
+}
 int foo2(int x, float y) {
-    printf("Here instead");
+    printf("Here instead\n");
     return x + y;
 }
 
 template<typename... Args>
 int foo(Args... a) {
+    //printf("YEAH %c", a...);
+    //Args... n = a...;
+	std::size_t s = sizeof...(Args);
+
+    std::cout << s << std::endl;
     return foo2(a...);
 }
 
+template<typename R, typename... Args>
+int wfoo(int NUM_THREADS, int* arr, int arr_len, R(*worker)(Args...), Args... a){
+    printf("WFOO with num args: %d\n", sizeof...(Args));
+    printf("NUM_THREADS: %d, arr_len: %d\n", NUM_THREADS, arr_len);
+    int res = (*worker)(a...);
+    printf("res is %d\n", res);
+    return 1;
+}
 
+/*
 // Definitions
 // Placeholder function for testing
 int addOne(int number) {
@@ -91,13 +110,13 @@ int farm(R(*worker)(Args... a), int arr_len, int* input_arr, int NUM_THREADS) {
 
     printf("NUM_THREADS: %d\n", NUM_THREADS);
 
-    /* Initialize array of threads */
+    // Initialize array of threads 
     pthread_t threads[NUM_THREADS];
 
-    /* Initialize thread_data_array */
+    // Initialize thread_data_array 
     thread_data<R, Args...> thread_data_array[NUM_THREADS];
 
-    /* Initialize and set thread detached attribute */
+    // Initialize and set thread detached attribute
     pthread_attr_t attr;
     pthread_attr_init(&attr);
     pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
@@ -126,10 +145,11 @@ int farm(R(*worker)(Args... a), int arr_len, int* input_arr, int NUM_THREADS) {
         printf("Main: completed join with thread %ld\n", t);
     }
 
-    /* Last thing that main() should do */
+    // Last thing that main() should do
     //pthread_exit(NULL);  // TODO put this in main
 
     return 1;  // TODO Change the return type
 }
+*/
 
 #endif
