@@ -4,6 +4,7 @@
 #include <iostream>
 
 int myfoo(int a, int b, int c){
+    printf("IN myfoo with %d %d %d\n", a, b, c);
     return a - b + c;
 }
 

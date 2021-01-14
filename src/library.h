@@ -4,6 +4,7 @@
 
 #include <iostream>
 #include <pthread.h>
+#include <tuple>
 
 const int MAX_THREADS = 16;
 
@@ -19,9 +20,23 @@ template<typename R, typename... Args> int farm(int NUM_THREADS, int* arr, int a
 template<typename R, typename... Args>
 struct thread_data {
     int thread_id;
-    //Args args;
-    //T number; // void * args or templates
     R(*worker)(Args...);
+    std::tuple<Args...> args;
+
+    template <std::size_t... Is>
+    void func(std::tuple<Args...>& tup, std::index_sequence<Is...>)
+    {
+        (*worker)(std::get<Is>(tup)...);
+    }
+
+    void func(std::tuple<Args...>& tup)
+    {
+        func(tup, std::index_sequence_for<Args...>{});
+    }
+
+    void run_worker(){
+        func(args);
+    }
 };
 
 template<typename R, typename... Args>
@@ -31,8 +46,22 @@ int wfoo(int NUM_THREADS, int* arr, int arr_len, R(*worker)(Args...), Args... a)
 
     thread_data<R, Args...> thread_data;
     // Experiment here
+    thread_data.thread_id = 1;
+    thread_data.worker = worker;
+    //thread_data.tup = std::make_tuple(std::move(a)...);
+    thread_data.args = std::tuple<Args...>(a...);
+    printf("size of tup: %d\n", sizeof(thread_data.args));
+    
+    thread_data.run_worker();
 
-    int res = (*worker)(a...);
+
+
+    int r = thread_data.worker(a...);
+
+    //int res = (*worker)(a...);
+
+
+    int res = 0;
     printf("res is %d\n", res);
     return 1;
 }
