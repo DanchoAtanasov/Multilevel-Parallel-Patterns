@@ -8,7 +8,7 @@
 
 const int MAX_THREADS = 16;
 
-template<typename R, typename... Args> int farm(int NUM_THREADS, int* arr, int arr_len, R(*worker)(Args...), Args... a);
+template<typename R, typename... Args> int farm(int NUM_THREADS, int* arr, int arr_len, R(*worker)(Args...), Args... args);
 
 template<typename R, typename... Args>
 struct thread_data {
@@ -16,6 +16,8 @@ struct thread_data {
     R(*worker)(Args...);
     std::tuple<Args...> args;
 
+    // The following 3 functions convert from tuple to parameter pack
+    // Code adapted from https://ideone.com/Nj6rGb
     template <std::size_t... Is>
     R func(std::tuple<Args...>& tup, std::index_sequence<Is...>)
     {
@@ -33,14 +35,14 @@ struct thread_data {
 };
 
 template<typename R, typename... Args>
-int wfoo(int NUM_THREADS, int* arr, int arr_len, R(*worker)(Args...), Args... a){
+int wfoo(int NUM_THREADS, int* arr, int arr_len, R(*worker)(Args...), Args... args){
     printf("WFOO with num args: %d\n", sizeof...(Args));
     //printf("NUM_THREADS: %d, arr_len: %d\n", NUM_THREADS, arr_len);
 
     thread_data<R, Args...> my_data;
     my_data.thread_id = 1;
     my_data.worker = worker;
-    my_data.args = std::tuple<Args...>(a...);
+    my_data.args = std::tuple<Args...>(args...);
 
     void* tmp = (void*)&my_data;
     thread_data<R, Args...> * ptr_my_data= (thread_data<R, Args...>*) tmp;
@@ -69,7 +71,7 @@ void* worker_wrapper(void* threadarg) {
 
 // Farm function that calls 'worker' function on 'input_array' with length 'arr_len'
 template<typename R, typename... Args>
-int farm(int NUM_THREADS, int* arr, int arr_len, R(*worker)(Args...), Args... a) {
+int farm(int NUM_THREADS, int* arr, int arr_len, R(*worker)(Args...), Args... args) {
     printf("In farm with num args: %d\n", sizeof...(Args));
     //printf("NUM_THREADS: %d, arr_len: %d\n", NUM_THREADS, arr_len);
 
@@ -96,7 +98,7 @@ int farm(int NUM_THREADS, int* arr, int arr_len, R(*worker)(Args...), Args... a)
     for (int t = 0; t < NUM_THREADS; t++) {
         thread_data_array[t].thread_id = t;
         thread_data_array[t].worker = worker;
-        thread_data_array[t].args = std::tuple<Args...>(a...);
+        thread_data_array[t].args = std::tuple<Args...>(args...);
         
 	    rc = pthread_create(&threads[t], &attr, worker_wrapper<R, Args...>, (void*)&thread_data_array[t]);
         if (rc) {
