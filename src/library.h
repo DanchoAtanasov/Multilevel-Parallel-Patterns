@@ -24,18 +24,18 @@ struct thread_data {
     std::tuple<Args...> args;
 
     template <std::size_t... Is>
-    void func(std::tuple<Args...>& tup, std::index_sequence<Is...>)
+    R func(std::tuple<Args...>& tup, std::index_sequence<Is...>)
     {
-        (*worker)(std::get<Is>(tup)...);
+        return (*worker)(std::get<Is>(tup)...);
     }
 
-    void func(std::tuple<Args...>& tup)
+    R func(std::tuple<Args...>& tup)
     {
-        func(tup, std::index_sequence_for<Args...>{});
+        return func(tup, std::index_sequence_for<Args...>{});
     }
 
-    void run_worker(){
-        func(args);
+    R run_worker(){
+        return func(args);
     }
 };
 
@@ -54,8 +54,6 @@ int wfoo(int NUM_THREADS, int* arr, int arr_len, R(*worker)(Args...), Args... a)
     
     thread_data.run_worker();
 
-
-
     int r = thread_data.worker(a...);
 
     //int res = (*worker)(a...);
@@ -65,7 +63,7 @@ int wfoo(int NUM_THREADS, int* arr, int arr_len, R(*worker)(Args...), Args... a)
     printf("res is %d\n", res);
     return 1;
 }
-/*
+
 // Definitions
 
 // worker_wrapper function that is called on separate threads
@@ -77,10 +75,11 @@ void* worker_wrapper(void* threadarg) {
     int tid = my_data->thread_id;
     //Args args = my_data->args;
     //T number = my_data->number;
-    R(*worker)(Args...) = my_data->worker;
+    //R(*worker)(Args...) = my_data->worker;
     printf("Working thread: %d\n", tid);
 
-    int res = (*worker)(Args...);
+    //int res = (*worker)(Args...);
+    R res = my_data->run_worker();
 
     printf("Thread %ld done with res: %d.\n", tid, res);
     pthread_exit(NULL);
@@ -114,7 +113,8 @@ int farm(int NUM_THREADS, int* arr, int arr_len, R(*worker)(Args...), Args... a)
     int rc;
     for (int t = 0; t < NUM_THREADS; t++) {
         thread_data_array[t].thread_id = t;
-        thread_data_array[t].args = a...;
+        //thread_data_array[t].args = a...;
+        thread_data.args = std::tuple<Args...>(a...);
         //thread_data_array[t].number = input_arr[t];
         thread_data_array[t].worker = worker;
         rc = pthread_create(&threads[t], &attr, worker_wrapper<R, Args...>, (void*)&thread_data_array[t]);
@@ -140,6 +140,6 @@ int farm(int NUM_THREADS, int* arr, int arr_len, R(*worker)(Args...), Args... a)
 
     return 1;  // TODO Change the return type
 }
-*/
+
 
 #endif

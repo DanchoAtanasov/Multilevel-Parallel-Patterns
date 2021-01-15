@@ -52,7 +52,8 @@ int main(){
     //wfoo<int, int, int>(foo2, 2, 5);
 
     int arr[5] = {1, 2, 3, 4, 5};
-    wfoo(5, arr, 5, myfoo, 2, 5, 8);
+    //wfoo(5, arr, 5, myfoo, 2, 5, 8);
+    int res = farm(5, arr, 5, myfoo, 2, 5, 8);
 
     /*int arr4[5] = { 1, 2, 3, 4, 5 };
     res = farm<int, int, int>(add2Args, 5, arr4);
