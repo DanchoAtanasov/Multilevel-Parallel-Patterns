@@ -101,7 +101,7 @@ int farm(int NUM_THREADS, int* arr, int arr_len, R(*worker)(Args...), AArgs... a
         thread_data_array[t].worker = worker;
         //thread_data_array[t].args = std::tuple<Args...>(args...);
         int start = t * (arr_len / NUM_THREADS);
-        int end = start + (arr_len / NUM_THREADS);
+        int end = start + (arr_len / NUM_THREADS); // TODO add remainder
         thread_data_array[t].args = std::tuple<Args...>(start, end, args...);
         
 	    rc = pthread_create(&threads[t], &attr, worker_wrapper<R, Args...>, (void*)&thread_data_array[t]);

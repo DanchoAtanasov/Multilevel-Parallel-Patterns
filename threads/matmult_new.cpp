@@ -1,14 +1,15 @@
 #include <iostream>
 #include "../src/library.h"
 
-#define MATRIX_SIZE 4
+#define MATRIX_SIZE 8
 
 float matrix1[MATRIX_SIZE][MATRIX_SIZE];
 float matrix2[MATRIX_SIZE][MATRIX_SIZE];
 float matrix3[MATRIX_SIZE][MATRIX_SIZE];
 
-int matrixmult(int start, int end) {
+int matrixmult(int start, int end, double additionalOption) {
     printf("In matrixmult with %d %d\n", start, end);
+    printf("additionalOption: %.2f\n", additionalOption);
     for (int i = start; i < end; i++) {
         for (int j = 0; j < MATRIX_SIZE; j++) {
             float c = 0.0f;
@@ -29,7 +30,7 @@ int main() {
         }
 
     int arr[2] = { 1, 2 };
-    int res = farm(2, arr, 4, matrixmult, 0, 0);
+    int res = farm(4, arr, 8, matrixmult, 35.50);
 
     printf("All values in matrix are: %.0f\n", matrix3[0][0]);
     printf("All values in matrix are: %.0f\n", matrix3[1][1]);
