@@ -7,8 +7,9 @@ float matrix1[MATRIX_SIZE][MATRIX_SIZE];
 float matrix2[MATRIX_SIZE][MATRIX_SIZE];
 float matrix3[MATRIX_SIZE][MATRIX_SIZE];
 
-int matrixmult(int from, int to) {
-    for (int i = from; i < to; i++) {
+int matrixmult(int start, int end) {
+    printf("In matrixmult with %d %d\n", start, end);
+    for (int i = start; i < end; i++) {
         for (int j = 0; j < MATRIX_SIZE; j++) {
             float c = 0.0f;
             for (int k = 0; k < MATRIX_SIZE; k++) {
@@ -27,8 +28,8 @@ int main() {
             matrix2[i][j] = 3.0f;
         }
 
-    int arr[5] = { 1, 2, 3, 4, 5 };
-    int res = farm(1, arr, 5, matrixmult, 0, 2);
+    int arr[2] = { 1, 2 };
+    int res = farm(2, arr, 2, matrixmult);
 
     printf("All values in matrix are: %.0f\n", matrix3[0][0]);
 }
