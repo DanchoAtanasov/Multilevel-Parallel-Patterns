@@ -18,12 +18,12 @@
 //#include <pthread.h>
 #include <time.h>
 
-//#define MAX_THREADS 128
+#define MAX_THREADS 128
 
 //pthread_t threadsTable[MAX_THREADS];
 //int threadsTableAllocated[MAX_THREADS];
 //pthread_mutexattr_t normalMutexAttr;
-//int numThreads = MAX_THREADS;
+int numThreads = MAX_THREADS;
 
 //Precision to use for calculations
 #define fptype float
