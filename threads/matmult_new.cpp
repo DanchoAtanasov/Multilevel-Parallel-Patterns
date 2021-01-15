@@ -1,0 +1,34 @@
+#include <iostream>
+#include "src/library.h"
+
+#define MATRIX_SIZE 2
+
+float matrix1[MATRIX_SIZE][MATRIX_SIZE];
+float matrix2[MATRIX_SIZE][MATRIX_SIZE];
+float matrix3[MATRIX_SIZE][MATRIX_SIZE];
+
+int matrixmult(int from, int to) {
+    for (int i = from; i < to; i++) {
+        for (int j = 0; j < MATRIX_SIZE; j++) {
+            float c = 0.0f;
+            for (int k = 0; k < MATRIX_SIZE; k++) {
+                c += matrix1[i][k] * matrix2[k][j];
+            }
+            matrix3[i][j] = c;
+        }
+    }
+    return 1;
+}
+
+int main() {
+    for (int i = 0; i < MATRIX_SIZE; i++)
+        for (int j = 0; j < MATRIX_SIZE; j++) {
+            matrix1[i][j] = 2.0f;
+            matrix2[i][j] = 3.0f;
+        }
+
+    int arr[5] = { 1, 2, 3, 4, 5 };
+    int res = farm(1, arr, 5, matrixmult, 0, 2);
+
+    printf("All values in matrix are: %.0f\n", matrix3[0][0]);
+}
