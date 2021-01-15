@@ -8,14 +8,7 @@
 
 const int MAX_THREADS = 16;
 
-// Declarations
-/*int addOne(int number);
-int addTwo(int number);
-char addChar(char character);
-int add2Args(int x, int y);*/
-
 template<typename R, typename... Args> int farm(int NUM_THREADS, int* arr, int arr_len, R(*worker)(Args...), Args... a);
-//template<typename T> int farm(T (*worker)(T), int arr_len, int* input_arr, int NUM_THREADS = MAX_THREADS);
 
 template<typename R, typename... Args>
 struct thread_data {
@@ -42,24 +35,18 @@ struct thread_data {
 template<typename R, typename... Args>
 int wfoo(int NUM_THREADS, int* arr, int arr_len, R(*worker)(Args...), Args... a){
     printf("WFOO with num args: %d\n", sizeof...(Args));
-    printf("NUM_THREADS: %d, arr_len: %d\n", NUM_THREADS, arr_len);
+    //printf("NUM_THREADS: %d, arr_len: %d\n", NUM_THREADS, arr_len);
 
-    thread_data<R, Args...> thread_data;
-    // Experiment here
-    thread_data.thread_id = 1;
-    thread_data.worker = worker;
-    //thread_data.tup = std::make_tuple(std::move(a)...);
-    thread_data.args = std::tuple<Args...>(a...);
-    printf("size of tup: %d\n", sizeof(thread_data.args));
-    
-    thread_data.run_worker();
+    thread_data<R, Args...> my_data;
+    my_data.thread_id = 1;
+    my_data.worker = worker;
+    my_data.args = std::tuple<Args...>(a...);
 
-    int r = thread_data.worker(a...);
+    void* tmp = (void*)&my_data;
+    thread_data<R, Args...> * ptr_my_data= (thread_data<R, Args...>*) tmp;
 
-    //int res = (*worker)(a...);
+    int res = ptr_my_data->run_worker();
 
-
-    int res = 0;
     printf("res is %d\n", res);
     return 1;
 }
@@ -70,15 +57,10 @@ int wfoo(int NUM_THREADS, int* arr, int arr_len, R(*worker)(Args...), Args... a)
 // Calls the provided worker function with the processeed arguments 
 template<typename R, typename... Args>
 void* worker_wrapper(void* threadarg) {
-    thread_data<Args...>* my_data;
-    my_data = (thread_data<Args...>*) threadarg;
+    thread_data<R, Args...>* my_data = (thread_data<R, Args...>*) threadarg;
     int tid = my_data->thread_id;
-    //Args args = my_data->args;
-    //T number = my_data->number;
-    //R(*worker)(Args...) = my_data->worker;
     printf("Working thread: %d\n", tid);
 
-    //int res = (*worker)(Args...);
     R res = my_data->run_worker();
 
     printf("Thread %ld done with res: %d.\n", tid, res);
@@ -89,7 +71,7 @@ void* worker_wrapper(void* threadarg) {
 template<typename R, typename... Args>
 int farm(int NUM_THREADS, int* arr, int arr_len, R(*worker)(Args...), Args... a) {
     printf("In farm with num args: %d\n", sizeof...(Args));
-    printf("NUM_THREADS: %d, arr_len: %d\n", NUM_THREADS, arr_len);
+    //printf("NUM_THREADS: %d, arr_len: %d\n", NUM_THREADS, arr_len);
 
     //int * result = (int*)malloc(arr_len * sizeof(int));
     //free(result)
@@ -113,11 +95,10 @@ int farm(int NUM_THREADS, int* arr, int arr_len, R(*worker)(Args...), Args... a)
     int rc;
     for (int t = 0; t < NUM_THREADS; t++) {
         thread_data_array[t].thread_id = t;
-        //thread_data_array[t].args = a...;
-        thread_data.args = std::tuple<Args...>(a...);
-        //thread_data_array[t].number = input_arr[t];
         thread_data_array[t].worker = worker;
-        rc = pthread_create(&threads[t], &attr, worker_wrapper<R, Args...>, (void*)&thread_data_array[t]);
+        thread_data_array[t].args = std::tuple<Args...>(a...);
+        
+	rc = pthread_create(&threads[t], &attr, worker_wrapper<R, Args...>, (void*)&thread_data_array[t]);
         if (rc) {
             printf("ERROR; return code from pthread_create() is %d\n", rc);
             exit(-1);
