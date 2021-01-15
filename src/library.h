@@ -8,7 +8,8 @@
 
 const int MAX_THREADS = 16;
 
-template<typename R, typename... Args> int farm(int NUM_THREADS, int* arr, int arr_len, R(*worker)(Args...), Args... args);
+template<typename R, typename... Args, typename... AArgs>
+int farm(int NUM_THREADS, int* arr, int arr_len, R(*worker)(Args...), AArgs... args);
 
 template<typename R, typename... Args>
 struct thread_data {
@@ -70,9 +71,9 @@ void* worker_wrapper(void* threadarg) {
 }
 
 // Farm function that calls 'worker' function on 'input_array' with length 'arr_len'
-template<typename R, typename... Args>
-int farm(int NUM_THREADS, int* arr, int arr_len, R(*worker)(Args...), Args... args) {
-    printf("In farm with num args: %d\n", sizeof...(Args));
+template<typename R, typename... Args, typename... AArgs>
+int farm(int NUM_THREADS, int* arr, int arr_len, R(*worker)(Args...), AArgs... args) {
+    printf("In farm with num args: %d\n", sizeof...(AArgs));
     //printf("NUM_THREADS: %d, arr_len: %d\n", NUM_THREADS, arr_len);
 
     //int * result = (int*)malloc(arr_len * sizeof(int));
@@ -101,7 +102,7 @@ int farm(int NUM_THREADS, int* arr, int arr_len, R(*worker)(Args...), Args... ar
         //thread_data_array[t].args = std::tuple<Args...>(args...);
         int start = t * (arr_len / NUM_THREADS);
         int end = start + (arr_len / NUM_THREADS);
-        thread_data_array[t].args = std::tuple<Args...>(start, end);
+        thread_data_array[t].args = std::tuple<Args...>(start, end, args...);
         
 	    rc = pthread_create(&threads[t], &attr, worker_wrapper<R, Args...>, (void*)&thread_data_array[t]);
         if (rc) {
