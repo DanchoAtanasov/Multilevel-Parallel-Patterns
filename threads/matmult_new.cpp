@@ -1,7 +1,7 @@
 #include <iostream>
-#include "src/library.h"
+#include "../src/library.h"
 
-#define MATRIX_SIZE 2
+#define MATRIX_SIZE 4
 
 float matrix1[MATRIX_SIZE][MATRIX_SIZE];
 float matrix2[MATRIX_SIZE][MATRIX_SIZE];
@@ -29,7 +29,8 @@ int main() {
         }
 
     int arr[2] = { 1, 2 };
-    int res = farm(2, arr, 2, matrixmult);
+    int res = farm(2, arr, 4, matrixmult, 0, 0);
 
     printf("All values in matrix are: %.0f\n", matrix3[0][0]);
+    printf("All values in matrix are: %.0f\n", matrix3[1][1]);
 }
