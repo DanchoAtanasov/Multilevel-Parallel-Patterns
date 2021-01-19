@@ -31,6 +31,5 @@ int main() {
 
     int res = farm(3, 100, matrixmult, 35.50);
 
-    printf("All values in matrix are: %.0f\n", matrix3[0][0]);
-    printf("All values in matrix are: %.0f\n", matrix3[99][99]);
+    printf("First and last values in the matrix are: %.0f, %.0f\n", matrix3[0][0], matrix3[MATRIX_SIZE-1][MATRIX_SIZE-1]);
 }
