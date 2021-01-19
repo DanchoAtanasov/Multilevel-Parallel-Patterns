@@ -9,7 +9,7 @@
 const int MAX_THREADS = 16;
 
 template<typename R, typename... Args, typename... AArgs>
-int farm(int NUM_THREADS, int* arr, int arr_len, R(*worker)(Args...), AArgs... args);
+int farm(int NUM_THREADS, int input_len, R(*worker)(Args...), AArgs... args);
 
 template<typename R, typename... Args>
 struct thread_data {
@@ -36,9 +36,9 @@ struct thread_data {
 };
 
 template<typename R, typename... Args>
-int wfoo(int NUM_THREADS, int* arr, int arr_len, R(*worker)(Args...), Args... args){
+int wfoo(int NUM_THREADS, int input_len, R(*worker)(Args...), Args... args){
     printf("WFOO with num args: %d\n", sizeof...(Args));
-    //printf("NUM_THREADS: %d, arr_len: %d\n", NUM_THREADS, arr_len);
+    //printf("NUM_THREADS: %d, input_len: %d\n", NUM_THREADS, input_len);
 
     thread_data<R, Args...> my_data;
     my_data.thread_id = 1;
@@ -70,17 +70,17 @@ void* worker_wrapper(void* threadarg) {
     pthread_exit(NULL);
 }
 
-// Farm function that calls 'worker' function on 'input_array' with length 'arr_len'
+// Farm function that calls 'worker' function on 'input_array' with length 'input_len'
 template<typename R, typename... Args, typename... AArgs>
-int farm(int NUM_THREADS, int* arr, int arr_len, R(*worker)(Args...), AArgs... args) {
+int farm(int NUM_THREADS, int input_len, R(*worker)(Args...), AArgs... args) {
     printf("In farm with num args: %d\n", sizeof...(AArgs));
-    //printf("NUM_THREADS: %d, arr_len: %d\n", NUM_THREADS, arr_len);
+    //printf("NUM_THREADS: %d, input_len: %d\n", NUM_THREADS, input_len);
 
-    //int * result = (int*)malloc(arr_len * sizeof(int));
+    //int * result = (int*)malloc(input_len * sizeof(int));
     //free(result)
 
     // If there are more threads requested than the array_lenght reduce threads
-    if (NUM_THREADS > arr_len) NUM_THREADS = arr_len;
+    if (NUM_THREADS > input_len) NUM_THREADS = input_len;
 
     printf("NUM_THREADS: %d\n", NUM_THREADS);
 
@@ -100,8 +100,8 @@ int farm(int NUM_THREADS, int* arr, int arr_len, R(*worker)(Args...), AArgs... a
         thread_data_array[t].thread_id = t;
         thread_data_array[t].worker = worker;
         //thread_data_array[t].args = std::tuple<Args...>(args...);
-        int start = t * (arr_len / NUM_THREADS);
-        int end = start + (arr_len / NUM_THREADS); // TODO add remainder
+        int start = t * (input_len / NUM_THREADS);
+        int end = start + (input_len / NUM_THREADS); // TODO add remainder
         thread_data_array[t].args = std::tuple<Args...>(start, end, args...);
         
 	    rc = pthread_create(&threads[t], &attr, worker_wrapper<R, Args...>, (void*)&thread_data_array[t]);
