@@ -29,8 +29,7 @@ int main() {
             matrix2[i][j] = 3.0f;
         }
 
-    int arr[2] = { 1, 2 };
-    int res = farm(4, arr, 8, matrixmult, 35.50);
+    int res = farm(4, 8, matrixmult, 35.50);
 
     printf("All values in matrix are: %.0f\n", matrix3[0][0]);
     printf("All values in matrix are: %.0f\n", matrix3[1][1]);

@@ -303,8 +303,7 @@ int main (int argc, char **argv)
 
     printf("Size of data: %d\n", numOptions * (sizeof(OptionData) + sizeof(int)));
 
-    int arr[1] = { 1 };
-    int res = farm(nThreads, arr, numOptions, bs_thread);
+    int res = farm(nThreads, numOptions, bs_thread);
     /*int *tids;
     tids = (int *) malloc (nThreads * sizeof(int));
 
