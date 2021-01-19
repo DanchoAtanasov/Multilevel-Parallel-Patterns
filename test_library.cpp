@@ -53,10 +53,10 @@ int sumArr(int start, int end, int *arr, int arr_len) {
 int main(){
     printf("Start of main\n");
 
-    int res = farm(5, 5, addOne, 3);
+    int res = farm(2, 5, addOne, 3);
     printf("--------------------------------\n");
 
-    res = farm(5, 5, addTwo, 7);
+    /*res = farm(5, 5, addTwo, 7);
     printf("--------------------------------\n");
 
     res = farm(5, 5, addChar, 'A');
@@ -68,7 +68,7 @@ int main(){
     printf("--------------------------------\n");
 
     res = farm(5, 5, add2Args, 1, 2);
-    printf("--------------------------------\n");
+    printf("--------------------------------\n");*/
 
     printf("End of main\n");
     
