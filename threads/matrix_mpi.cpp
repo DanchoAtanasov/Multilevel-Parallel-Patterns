@@ -13,7 +13,7 @@ struct _data {
 } data;
 
 int main(int argc, char* argv[]) {
-    int numtasks, rank, sendcount, recvcount, source;
+//    int numtasks, rank, sendcount, recvcount, source;
 
     int numtasks, rank, tag1 = 1;
 
@@ -34,6 +34,7 @@ int main(int argc, char* argv[]) {
     int from = rank * SPLIT;
     int to = from + SPLIT;
     int res[MATRIX_SIZE * SPLIT];
+    printf("In rank %d: from:%d, to:%d, res_size:%d\n", rank, from, to, MATRIX_SIZE * SPLIT);
     for (int i = from; i < to; i++) {
         for (int j = 0; j < MATRIX_SIZE; j++) {
             float c = 0.0f;
