@@ -316,25 +316,63 @@ int main(int argc, char** argv)
     MPI_Comm_size(MPI_COMM_WORLD, &numtasks);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
-    int from = rank * numOptions / numtasks;
-    int to = from + numOptions / numtasks;
+    const int SPLIT = numOptions / numtasks;
+    int from = rank * SPLIT;
+    int to = from + SPLIT;
     int res = bs_thread(from, to);
 
-    int buf[SPLIT * MATRIX_SIZE];
+    int buf[SPLIT];
 
-    if (rank == 1) {
+    if (rank == 0) {
         printf("Greetings from rank %d\n", rank);
         printf("res rank %d: %d, %d\n", rank, res[0], res[49]);
 
         // Send calculated values as 1d array to rank 1
-        MPI_Isend(res, SPLIT * MATRIX_SIZE, MPI_INT, 1, tag1, MPI_COMM_WORLD, &reqs[0]);
+        MPI_Isend(prices, SPLIT, MPI_INT, 1, tag1, MPI_COMM_WORLD, &reqs[0]);
     }
     else {
         printf("Greetings from rank %d\n", rank);
         printf("res rank %d: %d, %d\n", rank, res[0], res[49]);
 
         // Receive calculated values from rank 0
-        MPI_Irecv(buf, SPLIT * MATRIX_SIZE, MPI_INT, 0, tag1, MPI_COMM_WORLD, &reqs[0]);
+        MPI_Irecv(buf, SPLIT, MPI_INT, 0, tag1, MPI_COMM_WORLD, &reqs[0]);
+    }
+
+    // MPI wait for all messages to be delivered
+    MPI_Waitall(1, reqs, stats);
+
+    if (rank == 1) {
+        printf("rank 1 after wait\n");
+        for (int i = 0; i < SPLIT; i++) {
+            printf("%.2f", buf[i]);
+        }
+        printf("\n");
+
+        //Write prices to output file
+        file = fopen(outputFile, "w");
+        if (file == NULL) {
+            printf("ERROR: Unable to open file %s.\n", outputFile);
+            exit(1);
+        }
+        rv = fprintf(file, "%i\n", numOptions);
+        if (rv < 0) {
+            printf("ERROR: Unable to write to file %s.\n", outputFile);
+            fclose(file);
+            exit(1);
+        }
+        for (i = 0; i < numOptions; i++) {
+            rv = fprintf(file, "%.18f\n", prices[i]);
+            if (rv < 0) {
+                printf("ERROR: Unable to write to file %s.\n", outputFile);
+                fclose(file);
+                exit(1);
+            }
+        }
+        rv = fclose(file);
+        if (rv != 0) {
+            printf("ERROR: Unable to close file %s.\n", outputFile);
+            exit(1);
+        }
     }
 
     //int res = farm(nThreads, numOptions, bs_thread);
@@ -366,31 +404,7 @@ int main(int argc, char** argv)
 ;
     free(tids);*/
 
-    //Write prices to output file
-    file = fopen(outputFile, "w");
-    if (file == NULL) {
-        printf("ERROR: Unable to open file %s.\n", outputFile);
-        exit(1);
-    }
-    rv = fprintf(file, "%i\n", numOptions);
-    if (rv < 0) {
-        printf("ERROR: Unable to write to file %s.\n", outputFile);
-        fclose(file);
-        exit(1);
-    }
-    for (i = 0; i < numOptions; i++) {
-        rv = fprintf(file, "%.18f\n", prices[i]);
-        if (rv < 0) {
-            printf("ERROR: Unable to write to file %s.\n", outputFile);
-            fclose(file);
-            exit(1);
-        }
-    }
-    rv = fclose(file);
-    if (rv != 0) {
-        printf("ERROR: Unable to close file %s.\n", outputFile);
-        exit(1);
-    }
+    
 
     free(data);
     free(prices);
