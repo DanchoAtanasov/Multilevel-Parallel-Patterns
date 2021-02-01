@@ -12,7 +12,7 @@
 #include <math.h>
 #include <string.h>
 //#include "../../src/library.h"
-
+#include "mpi.h"
 
 // Multi-threaded pthreads header
 //#include <pthread.h>
@@ -270,7 +270,7 @@ int main(int argc, char** argv)
 
     //pthread_mutexattr_init( &normalMutexAttr);
 //    pthread_mutexattr_settype( &normalMutexAttr, PTHREAD_MUTEX_NORMAL);
-    numThreads = nThreads;
+    //numThreads = nThreads;
     /*{
         int i;
         for ( i = 0; i < MAX_THREADS; i++) {
