@@ -321,32 +321,38 @@ int main(int argc, char** argv)
     int to = from + SPLIT;
     int res = bs_thread(from, to);
 
-    int buf[SPLIT];
+    printf("rank:%d, price[0]: %0.2f\n", rank, prices[0]);
+    float buf[SPLIT];
 
-    if (rank == 0) {
+    if (rank == 1) {
         printf("Greetings from rank %d\n", rank);
-        printf("res rank %d: %d, %d\n", rank, res[0], res[49]);
+        //printf("res rank %d: %d, %d\n", rank, res[0], res[49]);
 
         // Send calculated values as 1d array to rank 1
-        MPI_Isend(prices, SPLIT, MPI_INT, 1, tag1, MPI_COMM_WORLD, &reqs[0]);
+        MPI_Isend(prices+SPLIT, SPLIT, MPI_FLOAT, 0, tag1, MPI_COMM_WORLD, &reqs[0]);
     }
     else {
         printf("Greetings from rank %d\n", rank);
-        printf("res rank %d: %d, %d\n", rank, res[0], res[49]);
+        //printf("res rank %d: %d, %d\n", rank, res[0], res[49]);
 
         // Receive calculated values from rank 0
-        MPI_Irecv(buf, SPLIT, MPI_INT, 0, tag1, MPI_COMM_WORLD, &reqs[0]);
+        MPI_Irecv(buf, SPLIT, MPI_FLOAT, 1, tag1, MPI_COMM_WORLD, &reqs[0]);
     }
 
     // MPI wait for all messages to be delivered
     MPI_Waitall(1, reqs, stats);
 
-    if (rank == 1) {
-        printf("rank 1 after wait\n");
+    if (rank == 0) {
+        printf("rank 0 after wait\n");
         for (int i = 0; i < SPLIT; i++) {
-            printf("%.2f", buf[i]);
+            printf("%.2f ", buf[i]);
+	    //prices[i+8] = buf[i];
         }
         printf("\n");
+        printf("numOptions:%d\n", numOptions); 
+	for (int i = 0; i < numOptions; i++) {
+            printf("%.2f\n", prices[i]);
+        }
 
         //Write prices to output file
         file = fopen(outputFile, "w");
