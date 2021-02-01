@@ -320,6 +320,23 @@ int main(int argc, char** argv)
     int to = from + numOptions / numtasks;
     int res = bs_thread(from, to);
 
+    int buf[SPLIT * MATRIX_SIZE];
+
+    if (rank == 1) {
+        printf("Greetings from rank %d\n", rank);
+        printf("res rank %d: %d, %d\n", rank, res[0], res[49]);
+
+        // Send calculated values as 1d array to rank 1
+        MPI_Isend(res, SPLIT * MATRIX_SIZE, MPI_INT, 1, tag1, MPI_COMM_WORLD, &reqs[0]);
+    }
+    else {
+        printf("Greetings from rank %d\n", rank);
+        printf("res rank %d: %d, %d\n", rank, res[0], res[49]);
+
+        // Receive calculated values from rank 0
+        MPI_Irecv(buf, SPLIT * MATRIX_SIZE, MPI_INT, 0, tag1, MPI_COMM_WORLD, &reqs[0]);
+    }
+
     //int res = farm(nThreads, numOptions, bs_thread);
     /*int *tids;
     tids = (int *) malloc (nThreads * sizeof(int));
