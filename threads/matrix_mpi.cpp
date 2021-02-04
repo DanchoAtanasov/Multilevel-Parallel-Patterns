@@ -88,12 +88,12 @@ int main(int argc, char* argv[]) {
 
     if (rank == 0) {
         printf("Greetings from rank %d for the third time\n", rank);
-        printf("Received result_matrix[0][0] is %.2f\n", final_matrix[0][0]);
+        printf("Received final_matrix[0][0] is %.2f\n", final_matrix[0][0]);
 
         // Combine results and print matrix
         for(int i = 0; i < MATRIX_SIZE; i++){
 	        for(int j = 0; j < MATRIX_SIZE; j++){
-                    matrix3[i][j] = final_matrix[i - rank * SUBMATRIX_ROWS][j];
+                    matrix3[i][j] = final_matrix[i][j];//final_matrix[i - rank * SUBMATRIX_ROWS][j];
 	            printf("%.2f ", matrix3[i][j]); 
 	        }
 	        printf("\n");
