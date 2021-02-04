@@ -7,7 +7,9 @@ float matrix1[MATRIX_SIZE][MATRIX_SIZE];
 float matrix2[MATRIX_SIZE][MATRIX_SIZE];
 float matrix3[MATRIX_SIZE][MATRIX_SIZE];
 
-float dancho[1][2]; 
+float dancho[1][2];
+
+const int TAG = 1;
 
 void work(float batch_matrix1[][MATRIX_SIZE], int batch_size, float matrix_result[][MATRIX_SIZE]) {
     printf("Working beep boop...\n");
@@ -28,10 +30,10 @@ void work(float batch_matrix1[][MATRIX_SIZE], int batch_size, float matrix_resul
 
 
 int main(int argc, char* argv[]) {
-    int numtasks, rank, tags[] = { 1, 2, 3, 4 };
+    int numtasks, rank;
     
-    MPI_Request reqs[4], final_req;   // required variable for non-blocking calls
-    MPI_Status stats[4], final_stats;   // required variable for Waitall routine
+    MPI_Request reqs[5];
+    MPI_Status stats[5];
 
     // Initialize MPI
     MPI_Init(&argc, &argv);
@@ -56,48 +58,48 @@ int main(int argc, char* argv[]) {
 
 	    float _dancho[2][2] = {{1.0, 2.0}, {3.0, 4.0}};
         //printf("DANCHO[1][1]: %.2f\n", _dancho[1][1]);	
-        for (int dest = 1; dest < numtasks; dest++) {
+        for (int dest = 0; dest < numtasks; dest++) {
             // Send matrix values
             //MPI_Isend(_dancho, 2, MPI_FLOAT, dest, tag1, MPI_COMM_WORLD, &reqs[0]);
-            MPI_Isend(matrix1+(dest * BATCH_SIZE), BATCH_SIZE * MATRIX_SIZE, MPI_FLOAT, dest, tags[0], MPI_COMM_WORLD, &reqs[0]);
-            MPI_Isend(matrix2, MATRIX_SIZE * MATRIX_SIZE, MPI_FLOAT, dest, tags[1], MPI_COMM_WORLD, &reqs[1]);
+            MPI_Isend(matrix1+(dest * BATCH_SIZE), BATCH_SIZE * MATRIX_SIZE, MPI_FLOAT, dest, TAG, MPI_COMM_WORLD, &reqs[0]);
+            MPI_Isend(matrix2, MATRIX_SIZE * MATRIX_SIZE, MPI_FLOAT, dest, TAG, MPI_COMM_WORLD, &reqs[1]);
             
             // Testing send to itself
-            int num = 42;
+            //int num = 42;
 
-            MPI_Irecv(&_num, 1, MPI_INT, 0, tags[3], MPI_COMM_WORLD, &reqs[3]);
-            MPI_Isend(num, 1, MPI_INT, 0, tags[3], MPI_COMM_WORLD, &reqs[3]);
+            //MPI_Irecv(&_num, 1, MPI_INT, 0, TAG, MPI_COMM_SELF, &reqs[3]);
+            //MPI_Isend(&num, 1, MPI_INT, 0, TAG, MPI_COMM_SELF, &reqs[3]);
         }
 
-	    for(int i = 0; i < BATCH_SIZE; i++){
+	    /*for(int i = 0; i < BATCH_SIZE; i++){
 		    for(int j=0;j<MATRIX_SIZE;j++){
                 batch_matrix1[i][j] = matrix1[i][j];    
 		    }
-	    }
+	    }*/
         
     }
-    else {
+    //else {
         printf("Greetings from rank %d\n", rank);
 
-        float _matrix1[BATCH_SIZE][MATRIX_SIZE];
-        float _matrix2[MATRIX_SIZE][MATRIX_SIZE];
+        //float _matrix1[BATCH_SIZE][MATRIX_SIZE];
+        //float _matrix2[MATRIX_SIZE][MATRIX_SIZE];
 
         // Receive matrices
         //MPI_Irecv(dancho, 2, MPI_FLOAT, 0, tag1, MPI_COMM_WORLD, &reqs[0]);
-        MPI_Irecv(batch_matrix1, BATCH_SIZE * MATRIX_SIZE, MPI_FLOAT, 0, tags[0], MPI_COMM_WORLD, &reqs[0]);
-        MPI_Irecv(matrix2, MATRIX_SIZE * MATRIX_SIZE, MPI_FLOAT, 0, tags[1], MPI_COMM_WORLD, &reqs[1]);
+        MPI_Irecv(batch_matrix1, BATCH_SIZE * MATRIX_SIZE, MPI_FLOAT, 0, TAG, MPI_COMM_WORLD, &reqs[2]);
+        MPI_Irecv(matrix2, MATRIX_SIZE * MATRIX_SIZE, MPI_FLOAT, 0, TAG, MPI_COMM_WORLD, &reqs[3]);
         
-    }
+    //}
 
-    MPI_Waitall(3, reqs, stats);
+    MPI_Waitall(4, reqs, stats);
 
     float matrix_res[BATCH_SIZE][MATRIX_SIZE];
     if (rank == 0) {
         printf("Greetings from rank %d again\n", rank);
-        printf("Testing self message - _num: %d\n", _num);
+        //printf("Testing self message - _num: %d\n", _num[0]);
         work(batch_matrix1, BATCH_SIZE, matrix_result);
         printf("matrix_result[0][0] after work is:  %.2f\n", matrix_result[0][0]);
-        MPI_Irecv(matrix_res, BATCH_SIZE * MATRIX_SIZE, MPI_FLOAT, 1, tags[2], MPI_COMM_WORLD, &reqs[2]);
+        MPI_Irecv(matrix_res, BATCH_SIZE * MATRIX_SIZE, MPI_FLOAT, 1, TAG, MPI_COMM_WORLD, &reqs[4]);
     }
     else {
         printf("Greetings from rank %d again\n", rank);
@@ -108,10 +110,10 @@ int main(int argc, char* argv[]) {
         
         printf("matrix_result[0][0] after work is:  %.2f\n", matrix_result[0][0]);
         //res = 10.5 + rank;
-        MPI_Isend(matrix_result, BATCH_SIZE * MATRIX_SIZE, MPI_FLOAT, 0, tags[2], MPI_COMM_WORLD, &reqs[2]);
+        MPI_Isend(matrix_result, BATCH_SIZE * MATRIX_SIZE, MPI_FLOAT, 0, TAG, MPI_COMM_WORLD, &reqs[4]);
     }
 
-    MPI_Wait(&reqs[3], &stats[3]);
+    MPI_Wait(&reqs[4], &stats[4]);
 
     if (rank == 0) {
         printf("Greetings from rank %d for the third time\n", rank);
