@@ -63,11 +63,12 @@ int main(int argc, char* argv[]) {
 
     MPI_Waitall(2, reqs, stats);
 
-    float final_matrix[SUBMATRIX_ROWS][MATRIX_SIZE];
+    float final_matrix[2][SUBMATRIX_ROWS][MATRIX_SIZE];
     if (rank == 0) {
         // Receive results from other nodes
+	//printf("matrixsize:%d, submatrix_total_size:%d, submatrix_rows:%d\n", MATRIX_SIZE, SUBMATRIX_TOTAL_SIZE, SUBMATRIX_ROWS);
         for (int dest = 0; dest < numtasks; dest++) {
-            MPI_Irecv(final_matrix + (dest * SUBMATRIX_TOTAL_SIZE), SUBMATRIX_TOTAL_SIZE, MPI_FLOAT, dest, TAG, MPI_COMM_WORLD, &reqs[2]);
+            MPI_Irecv(final_matrix[dest], SUBMATRIX_TOTAL_SIZE, MPI_FLOAT, dest, TAG, MPI_COMM_WORLD, &reqs[dest]);
         }
     }
 
@@ -84,21 +85,25 @@ int main(int argc, char* argv[]) {
     // Send result of work back to main node
     MPI_Isend(result_matrix, SUBMATRIX_TOTAL_SIZE, MPI_FLOAT, 0, TAG, MPI_COMM_WORLD, &reqs[2]);
 
-    MPI_Wait(&reqs[2], &stats[2]);
+    //MPI_Waitall(1, reqs+2, stats+2);
 
     if (rank == 0) {
         printf("Greetings from rank %d for the third time\n", rank);
-        printf("Received final_matrix[0][0] is %.2f\n", final_matrix[0][0]);
+        MPI_Waitall(2, reqs, stats);
+        printf("Received final_matrix[0][0][0] is %.2f\n", final_matrix[0][0][0]);
+        printf("Received final_matrix[1][0][0] is %.2f\n", final_matrix[1][0][0]);
 
         // Combine results and print matrix
         for(int i = 0; i < MATRIX_SIZE; i++){
 	        for(int j = 0; j < MATRIX_SIZE; j++){
-                    matrix3[i][j] = final_matrix[i][j];//final_matrix[i - rank * SUBMATRIX_ROWS][j];
+                    matrix3[i][j] = final_matrix[0][i][j];//final_matrix[i - rank * SUBMATRIX_ROWS][j];
 	            printf("%.2f ", matrix3[i][j]); 
 	        }
 	        printf("\n");
 	    }
     }
+
+    printf("rank: %d over\n", rank);
 
     MPI_Finalize();
 
