@@ -303,7 +303,7 @@ int main(int argc, char** argv)
         otime[i] = data[i].t;
     }
 
-    printf("Size of data: %d\n", numOptions * (sizeof(OptionData) + sizeof(int)));
+    printf("Size of data: %ld\n", numOptions * (sizeof(OptionData) + sizeof(int)));
 
     // MPI code
     int numtasks, rank, sendcount, recvcount, source;
@@ -329,7 +329,7 @@ int main(int argc, char** argv)
 
     MPI_Waitall(1, reqs, stats);
 
-    printf("rank: %d, dancho[0]: %d\n", dancho[0]);
+    printf("rank: %d, dancho[0]: %d\n", rank, dancho[0]);
 
     int from = rank * SPLIT;
     int to = from + SPLIT;
