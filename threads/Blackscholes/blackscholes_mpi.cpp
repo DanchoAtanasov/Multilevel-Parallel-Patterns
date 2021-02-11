@@ -321,7 +321,7 @@ int main(int argc, char** argv)
     sendcount = numOptions;
     recvcount = numOptions;
 
-    int* dancho;
+    int dancho[SPLIT];
 
     // Scattering matrix1 to all nodes in chunks
     MPI_Iscatter(otype, sendcount, MPI_INT, dancho, recvcount,
