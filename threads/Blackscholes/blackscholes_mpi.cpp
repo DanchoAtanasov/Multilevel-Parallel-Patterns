@@ -338,23 +338,23 @@ int main(int argc, char** argv)
     printf("rank:%d, price[0]: %0.2f\n", rank, prices[0]);
     float buf[SPLIT];
 
-    if (rank == 1) {
-        printf("Greetings from rank %d\n", rank);
-        //printf("res rank %d: %d, %d\n", rank, res[0], res[49]);
+    //if (rank == 1) {
+    //    printf("Greetings from rank %d\n", rank);
+    //    //printf("res rank %d: %d, %d\n", rank, res[0], res[49]);
 
-        // Send calculated values as 1d array to rank 1
-        MPI_Isend(prices+SPLIT, SPLIT, MPI_FLOAT, 0, tag1, MPI_COMM_WORLD, &reqs[0]);
-    }
-    else {
-        printf("Greetings from rank %d\n", rank);
-        //printf("res rank %d: %d, %d\n", rank, res[0], res[49]);
+    //    // Send calculated values as 1d array to rank 1
+    //    MPI_Isend(prices+SPLIT, SPLIT, MPI_FLOAT, 0, tag1, MPI_COMM_WORLD, &reqs[0]);
+    //}
+    //else {
+    //    printf("Greetings from rank %d\n", rank);
+    //    //printf("res rank %d: %d, %d\n", rank, res[0], res[49]);
 
-        // Receive calculated values from rank 0
-        MPI_Irecv(buf, SPLIT, MPI_FLOAT, 1, tag1, MPI_COMM_WORLD, &reqs[0]);
-    }
+    //    // Receive calculated values from rank 0
+    //    MPI_Irecv(buf, SPLIT, MPI_FLOAT, 1, tag1, MPI_COMM_WORLD, &reqs[0]);
+    //}
 
-    // MPI wait for all messages to be delivered
-    MPI_Waitall(1, reqs, stats);
+    //// MPI wait for all messages to be delivered
+    //MPI_Waitall(1, reqs, stats);
 
     if (rank == 0) {
         printf("rank 0 after wait\n");
