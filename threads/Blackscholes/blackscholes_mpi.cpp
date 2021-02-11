@@ -306,17 +306,31 @@ int main(int argc, char** argv)
     printf("Size of data: %d\n", numOptions * (sizeof(OptionData) + sizeof(int)));
 
     // MPI code
-    int numtasks, rank, tag1 = 1;
+    int numtasks, rank, sendcount, recvcount, source;
 
-    MPI_Request reqs[1];   // required variable for non-blocking calls
-    MPI_Status stats[1];   // required variable for Waitall routine
-
-    // Initialize MPI
     MPI_Init(&argc, &argv);
-    MPI_Comm_size(MPI_COMM_WORLD, &numtasks);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    MPI_Comm_size(MPI_COMM_WORLD, &numtasks);
+
+    MPI_Request reqs[2];
+    MPI_Status stats[2];
 
     const int SPLIT = numOptions / numtasks;
+
+    source = 0;
+    sendcount = numOptions;
+    recvcount = numOptions;
+
+    int* dancho;
+
+    // Scattering matrix1 to all nodes in chunks
+    MPI_Iscatter(otype, sendcount, MPI_INT, dancho, recvcount,
+        MPI_INT, source, MPI_COMM_WORLD, &reqs[0]);
+
+    MPI_Waitall(1, reqs, stats);
+
+    printf("rank: %d, dancho[0]: %d\n", dancho[0]);
+
     int from = rank * SPLIT;
     int to = from + SPLIT;
     int res = bs_thread(from, to);
@@ -350,9 +364,9 @@ int main(int argc, char** argv)
         }
         printf("\n");
         printf("numOptions:%d\n", numOptions); 
-	for (int i = 0; i < numOptions; i++) {
-            printf("%.2f\n", prices[i]);
-        }
+	    for (int i = 0; i < numOptions; i++) {
+                printf("%.2f\n", prices[i]);
+            }
 
         //Write prices to output file
         file = fopen(outputFile, "w");
