@@ -312,24 +312,33 @@ int main(int argc, char** argv)
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     MPI_Comm_size(MPI_COMM_WORLD, &numtasks);
 
-    MPI_Request reqs[2];
-    MPI_Status stats[2];
+    MPI_Request reqs[1];
+    MPI_Status stats[1];
+
+    MPI_Datatype MPI_OptionData;
+    MPI_Datatype type[9] = { MPI_FLOAT, MPI_FLOAT, MPI_FLOAT, MPI_FLOAT, MPI_FLOAT, MPI_FLOAT,
+        MPI_CHAR,  MPI_FLOAT,  MPI_FLOAT };
+    int blocklen[9] = { 1, 1, 1, 1, 1, 1, 1, 1, 1 };
+    MPI_Aint disp[9] = { offsetof(OptionData, s), offsetof(OptionData, strike), offsetof(OptionData, r),
+        offsetof(OptionData, divq),  offsetof(OptionData, v),  offsetof(OptionData, t),
+        offsetof(OptionData, OptionType),  offsetof(OptionData, divs),  offsetof(OptionData, DGrefval), };
+
 
     const int SPLIT = numOptions / numtasks;
 
     source = 0;
-    sendcount = numOptions;
-    recvcount = numOptions;
+    sendcount = SPLIT;
+    recvcount = SPLIT;
 
-    int dancho[SPLIT];
+    OptionData dancho[SPLIT];
 
     // Scattering matrix1 to all nodes in chunks
-    MPI_Iscatter(otype, sendcount, MPI_INT, dancho, recvcount,
-        MPI_INT, source, MPI_COMM_WORLD, &reqs[0]);
+    MPI_Iscatter(data, sendcount, MPI_OptionData, dancho, recvcount,
+        MPI_OptionData, source, MPI_COMM_WORLD, &reqs[0]);
 
     MPI_Waitall(1, reqs, stats);
 
-    printf("rank: %d, dancho[0]: %d\n", rank, dancho[0]);
+    printf("rank: %d, dancho[0].s: %d\n", rank, dancho[0].s);
 
     int from = rank * SPLIT;
     int to = from + SPLIT;
