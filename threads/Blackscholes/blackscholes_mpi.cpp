@@ -302,17 +302,6 @@ int main(int argc, char** argv)
         }
     }
 
-    //pthread_mutexattr_init( &normalMutexAttr);
-//    pthread_mutexattr_settype( &normalMutexAttr, PTHREAD_MUTEX_NORMAL);
-    //numThreads = nThreads;
-    /*{
-        int i;
-        for ( i = 0; i < MAX_THREADS; i++) {
-            threadsTableAllocated[i] = 0;
-        }
-    }*/
-    ;
-
     const int SPLIT = numOptions / numtasks;
     prices = (fptype*)malloc(SPLIT * sizeof(fptype));
     data = (OptionData*)malloc(SPLIT * sizeof(OptionData));
@@ -320,9 +309,6 @@ int main(int argc, char** argv)
     source = 0;
     sendcount = SPLIT;
     recvcount = SPLIT;
-
-
-    //OptionData dancho[SPLIT];
 
     // Scattering matrix1 to all nodes in chunks
     MPI_Iscatter(filedata, sendcount, MPI_OptionData, data, recvcount,
@@ -355,11 +341,6 @@ int main(int argc, char** argv)
 
     printf("Size of data: %ld\n", SPLIT * (sizeof(OptionData) + sizeof(int)));
 
-
-    
-    
-
-
     int from = rank * SPLIT;
     int to = from + SPLIT;
     int res = bs_thread(from, to);
@@ -367,23 +348,6 @@ int main(int argc, char** argv)
     printf("rank:%d, price[0]: %0.2f\n", rank, prices[0]);
     float buf[SPLIT];
 
-    //if (rank == 1) {
-    //    printf("Greetings from rank %d\n", rank);
-    //    //printf("res rank %d: %d, %d\n", rank, res[0], res[49]);
-
-    //    // Send calculated values as 1d array to rank 1
-    //    MPI_Isend(prices+SPLIT, SPLIT, MPI_FLOAT, 0, tag1, MPI_COMM_WORLD, &reqs[0]);
-    //}
-    //else {
-    //    printf("Greetings from rank %d\n", rank);
-    //    //printf("res rank %d: %d, %d\n", rank, res[0], res[49]);
-
-    //    // Receive calculated values from rank 0
-    //    MPI_Irecv(buf, SPLIT, MPI_FLOAT, 1, tag1, MPI_COMM_WORLD, &reqs[0]);
-    //}
-
-    //// MPI wait for all messages to be delivered
-    //MPI_Waitall(1, reqs, stats);
 
     if (rank == 0) {
         printf("rank 0 after wait\n");
@@ -423,37 +387,6 @@ int main(int argc, char** argv)
             exit(1);
         }
     }
-
-    //int res = farm(nThreads, numOptions, bs_thread);
-    /*int *tids;
-    tids = (int *) malloc (nThreads * sizeof(int));
-
-    for(i=0; i<nThreads; i++) {
-        tids[i]=i;
-
-    {
-        int i;
-        for ( i = 0; i < MAX_THREADS; i++) {
-            if ( threadsTableAllocated[i] == 0)    break;
-        }
-        pthread_create(&threadsTable[i],NULL,(void *(*)(void *))bs_thread,(void *)&tids[i]);
-        threadsTableAllocated[i] = 1;
-    }
-;
-    }
-
-    {
-        int i;
-        void *ret;
-        for ( i = 0; i < MAX_THREADS; i++) {
-            if ( threadsTableAllocated[i] == 0)    break;
-            pthread_join( threadsTable[i], &ret);
-        }
-    }
-;
-    free(tids);*/
-
-    
 
     free(data);
     free(prices);

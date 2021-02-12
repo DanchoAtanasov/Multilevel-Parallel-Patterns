@@ -33,7 +33,8 @@ int main(int argc, char *argv[])  {
         MPI_CHAR,  MPI_FLOAT,  MPI_FLOAT };
     int blocklen[9] = { 1, 1, 1, 1, 1, 1, 1, 1, 1 };
 
-    OptionData arr[4];
+    //OptionData arr[4];
+    OptionData * arr = (OptionData*)malloc(4 * sizeof(OptionData));
     arr[0].s = 0.5f; arr[0].strike = 0.2f;
     arr[1].s = 1.5f; arr[1].strike = 1.2f;
     arr[2].s = 2.5f; arr[2].strike = 2.2f;
