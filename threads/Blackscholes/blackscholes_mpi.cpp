@@ -46,6 +46,7 @@ typedef struct OptionData_ {
 OptionData* data;
 OptionData* filedata;
 fptype* prices;
+fptype* final_prices;
 int numOptions;
 
 int* otype;
@@ -226,8 +227,8 @@ int main(int argc, char** argv)
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     MPI_Comm_size(MPI_COMM_WORLD, &numtasks);
     
-    MPI_Request reqs[1];
-    MPI_Status stats[1];
+    MPI_Request reqs[3];
+    MPI_Status stats[3];
 
     MPI_Datatype MPI_OptionData;
     MPI_Datatype type[9] = { MPI_FLOAT, MPI_FLOAT, MPI_FLOAT, MPI_FLOAT, MPI_FLOAT, MPI_FLOAT,
@@ -284,6 +285,7 @@ int main(int argc, char** argv)
 
     // alloc spaces for the option data
         filedata = (OptionData*)malloc(numOptions * sizeof(OptionData));
+        final_prices = (fptype*)malloc(numOptions * sizeof(fptype));
 
     //if(rank == 0){
         for (loopnum = 0; loopnum < numOptions; ++loopnum)
@@ -302,7 +304,9 @@ int main(int argc, char** argv)
         }
     }
 
+    numOptions = 16;
     const int SPLIT = numOptions / numtasks;
+    printf("rank:%d SPLIT:%d, numOptions:%d, numtasks:%d\n", rank, SPLIT, numOptions, numtasks);
     prices = (fptype*)malloc(SPLIT * sizeof(fptype));
     data = (OptionData*)malloc(SPLIT * sizeof(OptionData));
 
@@ -348,9 +352,15 @@ int main(int argc, char** argv)
     printf("rank:%d, price[0]: %0.2f\n", rank, prices[0]);
     float buf[SPLIT];
 
+    
+    MPI_Igather(prices, sendcount, MPI_FLOAT, final_prices, recvcount,
+        MPI_FLOAT, source, MPI_COMM_WORLD, &reqs[1]);
+
+    
 
     if (rank == 0) {
         printf("rank 0 after wait\n");
+        MPI_Wait(&reqs[1], &stats[1]);
         for (int i = 0; i < SPLIT; i++) {
             printf("%.2f ", buf[i]);
 	    //prices[i+8] = buf[i];
@@ -358,7 +368,7 @@ int main(int argc, char** argv)
         printf("\n");
         printf("numOptions:%d\n", numOptions); 
 	    for (int i = 0; i < numOptions; i++) {
-                printf("%.2f\n", prices[i]);
+                printf("%.2f\n", final_prices[i]);
             }
 
         //Write prices to output file
@@ -386,6 +396,8 @@ int main(int argc, char** argv)
             printf("ERROR: Unable to close file %s.\n", outputFile);
             exit(1);
         }
+        free(filedata);
+        free(final_prices);
     }
 
     free(data);
