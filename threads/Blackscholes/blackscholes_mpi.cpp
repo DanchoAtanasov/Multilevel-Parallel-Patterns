@@ -44,6 +44,7 @@ typedef struct OptionData_ {
 } OptionData;
 
 OptionData* data;
+OptionData* filedata;
 fptype* prices;
 int numOptions;
 
@@ -217,55 +218,88 @@ int bs_thread(int start, int end) {
 
 int main(int argc, char** argv)
 {
+
+    // MPI code
+    int numtasks, rank, sendcount, recvcount, source;
+
+    MPI_Init(&argc, &argv);
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    MPI_Comm_size(MPI_COMM_WORLD, &numtasks);
+    
+    MPI_Request reqs[1];
+    MPI_Status stats[1];
+
+    MPI_Datatype MPI_OptionData;
+    MPI_Datatype type[9] = { MPI_FLOAT, MPI_FLOAT, MPI_FLOAT, MPI_FLOAT, MPI_FLOAT, MPI_FLOAT,
+        MPI_CHAR,  MPI_FLOAT,  MPI_FLOAT };
+    int blocklen[9] = { 1, 1, 1, 1, 1, 1, 1, 1, 1 };
+    MPI_Aint disp[9] = { offsetof(OptionData, s), offsetof(OptionData, strike), offsetof(OptionData, r),
+        offsetof(OptionData, divq),  offsetof(OptionData, v),  offsetof(OptionData, t),
+        offsetof(OptionData, OptionType),  offsetof(OptionData, divs),  offsetof(OptionData, DGrefval), };
+    MPI_Type_create_struct(9, blocklen, disp, type, &MPI_OptionData);
+    MPI_Type_commit(&MPI_OptionData);
+    
+
     FILE* file;
-    int i;
-    int loopnum;
     fptype* buffer;
     int* buffer2;
+    int i;
     int rv;
-
-    if (argc != 4)
-    {
-        printf("Usage:\n\t%s <nthreads> <inputFile> <outputFile>\n", argv[0]);
-        exit(1);
-    }
-    nThreads = atoi(argv[1]);
-    char* inputFile = argv[2];
     char* outputFile = argv[3];
+    
+    if(rank == 0){
+        int loopnum;
 
-    //Read input data from file
-    file = fopen(inputFile, "r");
-    if (file == NULL) {
-        printf("ERROR: Unable to open file %s.\n", inputFile);
-        exit(1);
-    }
-    rv = fscanf(file, "%i", &numOptions);
-    if (rv != 1) {
-        printf("ERROR: Unable to read from file %s.\n", inputFile);
-        fclose(file);
-        exit(1);
-    }
-    if (nThreads > numOptions) {
-        printf("WARNING: Not enough work, reducing number of threads to match number of options.\n");
-        nThreads = numOptions;
-    }
-
-    // alloc spaces for the option data
-    data = (OptionData*)malloc(numOptions * sizeof(OptionData));
-    prices = (fptype*)malloc(numOptions * sizeof(fptype));
-    for (loopnum = 0; loopnum < numOptions; ++loopnum)
-    {
-        rv = fscanf(file, "%f %f %f %f %f %f %c %f %f", &data[loopnum].s, &data[loopnum].strike, &data[loopnum].r, &data[loopnum].divq, &data[loopnum].v, &data[loopnum].t, &data[loopnum].OptionType, &data[loopnum].divs, &data[loopnum].DGrefval);
-        if (rv != 9) {
-            printf("ERROR: Unable to read from file %s.\n", inputFile);
-            fclose(file);
+        if (argc != 4)
+        {
+            printf("Usage:\n\t%s <nthreads> <inputFile> <outputFile>\n", argv[0]);
+            MPI_Abort(MPI_COMM_WORLD, 1);
             exit(1);
         }
-    }
-    rv = fclose(file);
-    if (rv != 0) {
-        printf("ERROR: Unable to close file %s.\n", inputFile);
-        exit(1);
+        nThreads = atoi(argv[1]);
+        char* inputFile = argv[2];
+
+        //Read input data from file
+        file = fopen(inputFile, "r");
+        if (file == NULL) {
+            printf("ERROR: Unable to open file %s.\n", inputFile);
+            MPI_Abort(MPI_COMM_WORLD, 1);
+            exit(1);
+        }
+        rv = fscanf(file, "%i", &numOptions);
+        if (rv != 1) {
+            printf("ERROR: Unable to read from file %s.\n", inputFile);
+            fclose(file);
+            MPI_Abort(MPI_COMM_WORLD, 1);
+            exit(1);
+        }
+        if (nThreads > numOptions) {
+            printf("WARNING: Not enough work, reducing number of threads to match number of options.\n");
+            nThreads = numOptions;
+        }
+        
+        printf("Num of Options: %d\n", numOptions);
+        printf("Num of Runs: %d\n", NUM_RUNS);
+    //}
+
+    // alloc spaces for the option data
+        filedata = (OptionData*)malloc(numOptions * sizeof(OptionData));
+
+    //if(rank == 0){
+        for (loopnum = 0; loopnum < numOptions; ++loopnum)
+        {
+            rv = fscanf(file, "%f %f %f %f %f %f %c %f %f", &filedata[loopnum].s, &filedata[loopnum].strike, &filedata[loopnum].r, &filedata[loopnum].divq, &filedata[loopnum].v, &filedata[loopnum].t, &filedata[loopnum].OptionType, &filedata[loopnum].divs, &filedata[loopnum].DGrefval);
+            if (rv != 9) {
+                printf("ERROR: Unable to read from file %s.\n", inputFile);
+                fclose(file);
+                exit(1);
+            }
+        }
+        rv = fclose(file);
+        if (rv != 0) {
+            printf("ERROR: Unable to close file %s.\n", inputFile);
+            exit(1);
+        }
     }
 
     //pthread_mutexattr_init( &normalMutexAttr);
@@ -278,23 +312,39 @@ int main(int argc, char** argv)
         }
     }*/
     ;
-    printf("Num of Options: %d\n", numOptions);
-    printf("Num of Runs: %d\n", NUM_RUNS);
 
+    const int SPLIT = numOptions / numtasks;
+    prices = (fptype*)malloc(SPLIT * sizeof(fptype));
+    data = (OptionData*)malloc(SPLIT * sizeof(OptionData));
+
+    source = 0;
+    sendcount = SPLIT;
+    recvcount = SPLIT;
+
+
+    //OptionData dancho[SPLIT];
+
+    // Scattering matrix1 to all nodes in chunks
+    MPI_Iscatter(filedata, sendcount, MPI_OptionData, data, recvcount,
+        MPI_OptionData, source, MPI_COMM_WORLD, &reqs[0]);
+
+    MPI_Waitall(1, reqs, stats);
+
+    printf("rank: %d, data[0].s: %.4f\n", rank, data[0].s);
 #define PAD 256
 #define LINESIZE 64
 
-    buffer = (fptype*)malloc(5 * numOptions * sizeof(fptype) + PAD);
+    buffer = (fptype*)malloc(5 * SPLIT * sizeof(fptype) + PAD);
     sptprice = (fptype*)(((unsigned long long)buffer + PAD) & ~(LINESIZE - 1));
-    strike = sptprice + numOptions;
-    rate = strike + numOptions;
-    volatility = rate + numOptions;
-    otime = volatility + numOptions;
+    strike = sptprice + SPLIT;
+    rate = strike + SPLIT;
+    volatility = rate + SPLIT;
+    otime = volatility + SPLIT;
 
-    buffer2 = (int*)malloc(numOptions * sizeof(fptype) + PAD);
+    buffer2 = (int*)malloc(SPLIT * sizeof(fptype) + PAD);
     otype = (int*)(((unsigned long long)buffer2 + PAD) & ~(LINESIZE - 1));
 
-    for (i = 0; i < numOptions; i++) {
+    for (i = 0; i < SPLIT; i++) {
         otype[i] = (data[i].OptionType == 'P') ? 1 : 0;
         sptprice[i] = data[i].s;
         strike[i] = data[i].strike;
@@ -303,42 +353,12 @@ int main(int argc, char** argv)
         otime[i] = data[i].t;
     }
 
-    printf("Size of data: %ld\n", numOptions * (sizeof(OptionData) + sizeof(int)));
-
-    // MPI code
-    int numtasks, rank, sendcount, recvcount, source;
-
-    MPI_Init(&argc, &argv);
-    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-    MPI_Comm_size(MPI_COMM_WORLD, &numtasks);
-
-    MPI_Request reqs[1];
-    MPI_Status stats[1];
-
-    MPI_Datatype MPI_OptionData;
-    MPI_Datatype type[9] = { MPI_FLOAT, MPI_FLOAT, MPI_FLOAT, MPI_FLOAT, MPI_FLOAT, MPI_FLOAT,
-        MPI_CHAR,  MPI_FLOAT,  MPI_FLOAT };
-    int blocklen[9] = { 1, 1, 1, 1, 1, 1, 1, 1, 1 };
-    MPI_Aint disp[9] = { offsetof(OptionData, s), offsetof(OptionData, strike), offsetof(OptionData, r),
-        offsetof(OptionData, divq),  offsetof(OptionData, v),  offsetof(OptionData, t),
-        offsetof(OptionData, OptionType),  offsetof(OptionData, divs),  offsetof(OptionData, DGrefval), };
+    printf("Size of data: %ld\n", SPLIT * (sizeof(OptionData) + sizeof(int)));
 
 
-    const int SPLIT = numOptions / numtasks;
+    
+    
 
-    source = 0;
-    sendcount = SPLIT;
-    recvcount = SPLIT;
-
-    OptionData dancho[SPLIT];
-
-    // Scattering matrix1 to all nodes in chunks
-    MPI_Iscatter(data, sendcount, MPI_OptionData, dancho, recvcount,
-        MPI_OptionData, source, MPI_COMM_WORLD, &reqs[0]);
-
-    MPI_Waitall(1, reqs, stats);
-
-    printf("rank: %d, dancho[0].s: %d\n", rank, dancho[0].s);
 
     int from = rank * SPLIT;
     int to = from + SPLIT;

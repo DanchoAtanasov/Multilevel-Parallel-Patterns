@@ -33,16 +33,18 @@ int main(int argc, char *argv[])  {
         MPI_CHAR,  MPI_FLOAT,  MPI_FLOAT };
     int blocklen[9] = { 1, 1, 1, 1, 1, 1, 1, 1, 1 };
 
-    OptionData arr[2];
-    arr[0].s = 5.7f; arr[0].strike = 2.0f;
-    arr[1].s = 8.2f; arr[1].strike = 3.2f;
+    OptionData arr[4];
+    arr[0].s = 0.5f; arr[0].strike = 0.2f;
+    arr[1].s = 1.5f; arr[1].strike = 1.2f;
+    arr[2].s = 2.5f; arr[2].strike = 2.2f;
+    arr[3].s = 3.5f; arr[3].strike = 3.2f;
     MPI_Aint disp[9] = { offsetof(OptionData, s), offsetof(OptionData, strike), offsetof(OptionData, r),
         offsetof(OptionData, divq),  offsetof(OptionData, v),  offsetof(OptionData, t),
         offsetof(OptionData, OptionType),  offsetof(OptionData, divs),  offsetof(OptionData, DGrefval), };
 
     source = 0;
-    sendcount = 1;
-    recvcount = 1;
+    sendcount = 2;
+    recvcount = 2;
 
     //bla arr[2];
     //arr[0].x = 5;    
@@ -51,7 +53,8 @@ int main(int argc, char *argv[])  {
     MPI_Type_create_struct(9, blocklen, disp, type, &MPI_OptionData);
     MPI_Type_commit(&MPI_OptionData);
 
-    OptionData dua[1];
+    //OptionData dua[1];
+    OptionData * dua = (OptionData*)malloc(recvcount * sizeof(OptionData));
     // Scattering matrix1 to all nodes in chunks
     MPI_Iscatter(arr,sendcount, MPI_OptionData,dua,recvcount,
         MPI_OptionData,source,MPI_COMM_WORLD, &reqs[0]);
@@ -60,6 +63,7 @@ int main(int argc, char *argv[])  {
     MPI_Waitall(1, reqs, stats);
 
     printf("rank:%d, received:%f, %f\n", rank, dua[0].s, dua[0].strike);
+    printf("rank:%d, received:%f, %f\n", rank, dua[1].s, dua[1].strike);
 
     MPI_Finalize();
 }
