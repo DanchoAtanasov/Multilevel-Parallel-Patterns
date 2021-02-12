@@ -28,14 +28,14 @@ int main(int argc, char *argv[])  {
 
     MPI_Request reqs[1];
     MPI_Status stats[1];
-    MPI_Datatype OptionData;
-    MPI_Datatype type[1] = { MPI_FLOAT, MPI_FLOAT, MPI_FLOAT, MPI_FLOAT, MPI_FLOAT, MPI_FLOAT,
+    MPI_Datatype MPI_OptionData;
+    MPI_Datatype type[9] = { MPI_FLOAT, MPI_FLOAT, MPI_FLOAT, MPI_FLOAT, MPI_FLOAT, MPI_FLOAT,
         MPI_CHAR,  MPI_FLOAT,  MPI_FLOAT };
     int blocklen[9] = { 1, 1, 1, 1, 1, 1, 1, 1, 1 };
 
     OptionData arr[2];
-    arr[0].s = 5.5f;
-    arr[1].s = 7.2f;
+    arr[0].s = 5.7f; arr[0].strike = 2.0f;
+    arr[1].s = 8.2f; arr[1].strike = 3.2f;
     MPI_Aint disp[9] = { offsetof(OptionData, s), offsetof(OptionData, strike), offsetof(OptionData, r),
         offsetof(OptionData, divq),  offsetof(OptionData, v),  offsetof(OptionData, t),
         offsetof(OptionData, OptionType),  offsetof(OptionData, divs),  offsetof(OptionData, DGrefval), };
@@ -48,18 +48,18 @@ int main(int argc, char *argv[])  {
     //arr[0].x = 5;    
     //arr[1].x = 9;    
 
-    MPI_Type_create_struct(1, blocklen, disp, type, &OptionData);
-    MPI_Type_commit(&OptionData);
+    MPI_Type_create_struct(9, blocklen, disp, type, &MPI_OptionData);
+    MPI_Type_commit(&MPI_OptionData);
 
     OptionData dua[1];
     // Scattering matrix1 to all nodes in chunks
-    MPI_Iscatter(arr,sendcount, OptionData,dua,recvcount,
-        OptionData,source,MPI_COMM_WORLD, &reqs[0]);
+    MPI_Iscatter(arr,sendcount, MPI_OptionData,dua,recvcount,
+        MPI_OptionData,source,MPI_COMM_WORLD, &reqs[0]);
 
     // Wait for messages to be received
     MPI_Waitall(1, reqs, stats);
 
-    printf("rank:%d, received:%d\n", rank, dua[0].x);
+    printf("rank:%d, received:%f, %f\n", rank, dua[0].s, dua[0].strike);
 
     MPI_Finalize();
 }
