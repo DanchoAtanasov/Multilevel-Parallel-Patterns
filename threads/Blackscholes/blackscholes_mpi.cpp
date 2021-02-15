@@ -192,8 +192,8 @@ fptype BlkSchlsEqEuroNoDiv(fptype sptprice,
     return OptionPrice;
 }
 
-int bs_thread(int start, int end) {
-    printf("In bs_thread with %d %d\n", start, end);
+int bs_thread(int numOptions) {
+    //printf("In bs_thread with %d %d\n", start, end);
     int i, j;
     fptype price;
     fptype priceDelta;
@@ -202,7 +202,7 @@ int bs_thread(int start, int end) {
     //int end = start + (numOptions / nThreads);
 
     for (j = 0; j < NUM_RUNS; j++) {
-        for (i = start; i < end; i++) {
+        for (i = 0; i < numOptions; i++) { 
             /* Calling main function to calculate option value based on
              * Black & Scholes's equation.
              */
@@ -281,6 +281,7 @@ int main(int argc, char** argv)
         
         printf("Num of Options: %d\n", numOptions);
         printf("Num of Runs: %d\n", NUM_RUNS);
+
     //}
 
     // alloc spaces for the option data
@@ -304,9 +305,12 @@ int main(int argc, char** argv)
         }
     }
 
-    numOptions = 16;
+    
+    // Broadcasting numOptions to all nodes
+    MPI_Ibcast(&numOptions, 1, MPI_INT, 0, MPI_COMM_WORLD, &reqs[2]);
+    MPI_Wait(&reqs[2], &stats[2]);
+
     const int SPLIT = numOptions / numtasks;
-    printf("rank:%d SPLIT:%d, numOptions:%d, numtasks:%d\n", rank, SPLIT, numOptions, numtasks);
     prices = (fptype*)malloc(SPLIT * sizeof(fptype));
     data = (OptionData*)malloc(SPLIT * sizeof(OptionData));
 
@@ -314,13 +318,12 @@ int main(int argc, char** argv)
     sendcount = SPLIT;
     recvcount = SPLIT;
 
-    // Scattering matrix1 to all nodes in chunks
+    // Scattering input data to all nodes
     MPI_Iscatter(filedata, sendcount, MPI_OptionData, data, recvcount,
         MPI_OptionData, source, MPI_COMM_WORLD, &reqs[0]);
 
     MPI_Waitall(1, reqs, stats);
 
-    printf("rank: %d, data[0].s: %.4f\n", rank, data[0].s);
 #define PAD 256
 #define LINESIZE 64
 
@@ -347,28 +350,17 @@ int main(int argc, char** argv)
 
     int from = rank * SPLIT;
     int to = from + SPLIT;
-    int res = bs_thread(from, to);
+    int res = bs_thread(SPLIT);
 
-    printf("rank:%d, price[0]: %0.2f\n", rank, prices[0]);
-    float buf[SPLIT];
-
-    
     MPI_Igather(prices, sendcount, MPI_FLOAT, final_prices, recvcount,
         MPI_FLOAT, source, MPI_COMM_WORLD, &reqs[1]);
-
-    
 
     if (rank == 0) {
         printf("rank 0 after wait\n");
         MPI_Wait(&reqs[1], &stats[1]);
-        for (int i = 0; i < SPLIT; i++) {
-            printf("%.2f ", buf[i]);
-	    //prices[i+8] = buf[i];
-        }
-        printf("\n");
         printf("numOptions:%d\n", numOptions); 
 	    for (int i = 0; i < numOptions; i++) {
-                printf("%.2f\n", final_prices[i]);
+                printf("%f\n", final_prices[i]);
             }
 
         //Write prices to output file
@@ -384,7 +376,7 @@ int main(int argc, char** argv)
             exit(1);
         }
         for (i = 0; i < numOptions; i++) {
-            rv = fprintf(file, "%.18f\n", prices[i]);
+            rv = fprintf(file, "%.18f\n", final_prices[i]);
             if (rv < 0) {
                 printf("ERROR: Unable to write to file %s.\n", outputFile);
                 fclose(file);
@@ -402,6 +394,8 @@ int main(int argc, char** argv)
 
     free(data);
     free(prices);
+
+    printf("rank:%d finished.\n", rank);
 
     return 0;
 }
