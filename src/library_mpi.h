@@ -6,7 +6,7 @@
 #include <stdio.h>
 
 template<typename R, typename... Args>
-int farm(R(*worker)(Args...), const int MATRIX_SIZE, float m1[][100], float m2[][100], float m3[][100]){ 
+int farm(R(*worker)(Args...), const int MATRIX_SIZE, float matrix1[][10], float matrix2[][10], float matrix3[][10]){ 
     printf("In farm\n");
 	int numtasks, rank, sendcount, recvcount, source;
 
@@ -20,7 +20,7 @@ int farm(R(*worker)(Args...), const int MATRIX_SIZE, float m1[][100], float m2[]
 	const int MATRIX_TOTAL_SIZE = MATRIX_SIZE * MATRIX_SIZE;
 	const int SUBMATRIX_ROWS = MATRIX_SIZE / numtasks;
 	const int SUBMATRIX_TOTAL_SIZE = SUBMATRIX_ROWS * MATRIX_SIZE;
-	float submatrix[SUBMATRIX_ROWS][MATRIX_SIZE];
+	float submatrix[SUBMATRIX_ROWS][10];
 
 	if (rank == 0) {
 		for (int i = 0; i < MATRIX_SIZE; i++)
@@ -47,9 +47,10 @@ int farm(R(*worker)(Args...), const int MATRIX_SIZE, float m1[][100], float m2[]
     printf("rank: %d, submatrix[0][0]: %.2f\n", rank, submatrix[0][0]);
     printf("rank: %d, matrix2[0][0]: %.2f\n", rank, matrix2[0][0]);
 
-    float result_matrix[SUBMATRIX_ROWS][MATRIX_SIZE];
+    float result_matrix[SUBMATRIX_ROWS][10];
     // Call worker function, save result in result_matrix
-    int res = (*work)(submatrix, SUBMATRIX_ROWS, result_matrix);
+    int res = 1;
+     (*worker)(submatrix, SUBMATRIX_ROWS, result_matrix);
 
     // Gather results from all nodes to main node
     MPI_Igather(result_matrix, sendcount, MPI_FLOAT, matrix3, recvcount,

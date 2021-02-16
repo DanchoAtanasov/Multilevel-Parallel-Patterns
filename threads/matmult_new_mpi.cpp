@@ -1,7 +1,7 @@
 #include <iostream>
 #include "../src/library_mpi.h"
 
-#define MATRIX_SIZE 100
+const int MATRIX_SIZE = 10;
 
 float matrix1[MATRIX_SIZE][MATRIX_SIZE];
 float matrix2[MATRIX_SIZE][MATRIX_SIZE];
