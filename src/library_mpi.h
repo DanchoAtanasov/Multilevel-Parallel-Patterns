@@ -6,8 +6,8 @@
 #include "mpi.h"
 #include <stdio.h>
 
-template<typename R, typename... Args, typename... AArgs>
-int farm(R(*worker)(Args...), float* m1, float* m2, float* m3) {
+template<typename R, typename... Args>
+int farm(R(*worker)(Args...), float m1[][100], float m2[][100], float m3[][100]){ 
     printf("In farm\n");
 	int numtasks, rank, sendcount, recvcount, source;
 
@@ -35,7 +35,7 @@ int farm(R(*worker)(Args...), float* m1, float* m2, float* m3) {
 	MPI_Waitall(1, reqs, stats);
 
 	printf("sup %d\n", payload);
-	int res = (*worker);
+	int res = (*worker)();
 
 	MPI_Finalize();
 
