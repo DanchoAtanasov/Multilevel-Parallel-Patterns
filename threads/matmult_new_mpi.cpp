@@ -22,6 +22,11 @@ int matrixmult(int start, int end, double additionalOption) {
     return 1;
 }
 
+int foo() {
+    printf("In Foo!\n");
+    return 1;
+}
+
 int main() {
     for (int i = 0; i < MATRIX_SIZE; i++)
         for (int j = 0; j < MATRIX_SIZE; j++) {
@@ -31,7 +36,7 @@ int main() {
 
     //int res = farm(3, 100, matrixmult, 35.50);
 
-    farm();
+    int res = farm(foo, matrix1, matrix2, matrix3);
 
     printf("First and last values in the matrix are: %.0f, %.0f\n", matrix3[0][0], matrix3[MATRIX_SIZE - 1][MATRIX_SIZE - 1]);
 }
