@@ -31,5 +31,7 @@ int main() {
 
     //int res = farm(3, 100, matrixmult, 35.50);
 
+    foo();
+
     printf("First and last values in the matrix are: %.0f, %.0f\n", matrix3[0][0], matrix3[MATRIX_SIZE - 1][MATRIX_SIZE - 1]);
 }
