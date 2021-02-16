@@ -7,9 +7,10 @@
 #include <stdio.h>
 
 int farm() {
+    printf("In farm\n");
 	int numtasks, rank, sendcount, recvcount, source;
 
-	MPI_Init(&argc, &argv);
+	MPI_Init(NULL, NULL);
 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 	MPI_Comm_size(MPI_COMM_WORLD, &numtasks);
 
@@ -27,12 +28,12 @@ int farm() {
 	recvcount = 1;
 
 	// Broadcasting the whole matrix2 to all nodes
-	MPI_Ibcast(payload, 1, MPI_INT, source, MPI_COMM_WORLD, &reqs[0]);
+	MPI_Ibcast(&payload, 1, MPI_INT, source, MPI_COMM_WORLD, &reqs[0]);
 
 	// Wait for messages to be received
 	MPI_Waitall(1, reqs, stats);
 
-	printf("sup %d", payload);
+	printf("sup %d\n", payload);
 
 	MPI_Finalize();
 
