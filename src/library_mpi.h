@@ -5,6 +5,11 @@
 #include "mpi.h"
 #include <stdio.h>
 
+int load(void(*func)()) {
+    printf("load\n");
+    (*worker)();
+}
+
 template<typename R, typename... Args>
 int farm(R(*worker)(Args...), const int MATRIX_SIZE, float matrix1[][10], float matrix2[][10], float matrix3[][10]){ 
     printf("In farm\n");

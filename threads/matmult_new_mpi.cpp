@@ -41,13 +41,24 @@ int foo() {
     return 1;
 }
 
-int main() {
-    printf("Beginning of main\n");
+void init_matrices() {
+    printf("Beginning of init_matrices\n");
     for (int i = 0; i < MATRIX_SIZE; i++)
         for (int j = 0; j < MATRIX_SIZE; j++) {
             matrix1[i][j] = 2.0f;
             matrix2[i][j] = 3.0f;
         }
+}
+
+int main() {
+    printf("Beginning of main\n");
+    /*for (int i = 0; i < MATRIX_SIZE; i++)
+        for (int j = 0; j < MATRIX_SIZE; j++) {
+            matrix1[i][j] = 2.0f;
+            matrix2[i][j] = 3.0f;
+        }*/
+
+    load(init_matrices);
 
     //int res = farm(3, 100, matrixmult, 35.50);
 
