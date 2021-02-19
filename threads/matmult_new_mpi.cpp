@@ -42,6 +42,7 @@ int foo() {
 }
 
 int main() {
+    printf("Beginning of main\n");
     for (int i = 0; i < MATRIX_SIZE; i++)
         for (int j = 0; j < MATRIX_SIZE; j++) {
             matrix1[i][j] = 2.0f;

@@ -22,13 +22,13 @@ int farm(R(*worker)(Args...), const int MATRIX_SIZE, float matrix1[][10], float 
 	const int SUBMATRIX_TOTAL_SIZE = SUBMATRIX_ROWS * MATRIX_SIZE;
 	float submatrix[SUBMATRIX_ROWS][10];
 
-	if (rank == 0) {
+	/*if (rank == 0) {
 		for (int i = 0; i < MATRIX_SIZE; i++)
 			for (int j = 0; j < MATRIX_SIZE; j++) {
 				matrix1[i][j] = 2.0f;
 				matrix2[i][j] = 3.0f;
 			}
-	}
+	}*/
 
 	source = 0;
 	sendcount = SUBMATRIX_TOTAL_SIZE;
