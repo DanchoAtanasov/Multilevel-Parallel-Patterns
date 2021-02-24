@@ -10,6 +10,8 @@ int numtasks, rank, sendcount, recvcount, source;
 MPI_Request reqs[3];
 MPI_Status stats[3];
 
+float submatrix[5][10]; // Remove this
+
 void init() {
     MPI_Init(NULL, NULL);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
@@ -23,17 +25,23 @@ void load(void(*func)()) {
     }
 }
 
-void scatter(float matrix1[][10], int SIZE) {
-    const int SUBMATRIX_ROWS = SIZE / numtasks;
-    float submatrix[SUBMATRIX_ROWS][10];
+void scatter(float matrix[][10], int SIZE) {
+    /*const int SUBMATRIX_ROWS = SIZE / numtasks;
+    float submatrix[SUBMATRIX_ROWS][10];*/
 
     // Scattering matrix1 to all nodes in chunks
-    MPI_Iscatter(matrix1, SUBMATRIX_ROWS, MPI_FLOAT, submatrix, SUBMATRIX_ROWS,
+    MPI_Iscatter(matrix, SUBMATRIX_ROWS, MPI_FLOAT, submatrix, SUBMATRIX_ROWS,
         MPI_FLOAT, 0, MPI_COMM_WORLD, &reqs[0]);
 }
 
+void broadcast(float matrix[][10], int SIZE) {
+    // Broadcasting the whole matrix2 to all nodes
+    MPI_Ibcast(matrix, SIZE * SIZE, MPI_FLOAT,
+        0, MPI_COMM_WORLD, &reqs[1]);
+}
+
 template<typename R, typename... Args>
-int farm(R(*worker)(Args...), const int MATRIX_SIZE, float matrix1[][10], float matrix2[][10], float matrix3[][10]){ 
+int farm(R(*worker)(Args...), const int MATRIX_SIZE, float matrix3[][10]){ 
     printf("In farm\n");
 	/*int numtasks, rank, sendcount, recvcount, source;
 
@@ -47,7 +55,7 @@ int farm(R(*worker)(Args...), const int MATRIX_SIZE, float matrix1[][10], float 
 	const int MATRIX_TOTAL_SIZE = MATRIX_SIZE * MATRIX_SIZE;
 	const int SUBMATRIX_ROWS = MATRIX_SIZE / numtasks;
 	const int SUBMATRIX_TOTAL_SIZE = SUBMATRIX_ROWS * MATRIX_SIZE;
-	float submatrix[SUBMATRIX_ROWS][10];
+	//float submatrix[SUBMATRIX_ROWS][10];
 
 	/*if (rank == 0) {
 		for (int i = 0; i < MATRIX_SIZE; i++)
@@ -64,9 +72,9 @@ int farm(R(*worker)(Args...), const int MATRIX_SIZE, float matrix1[][10], float 
     // Scattering matrix1 to all nodes in chunks
     /*MPI_Iscatter(matrix1, sendcount, MPI_FLOAT, submatrix, recvcount,
        MPI_FLOAT, source, MPI_COMM_WORLD, &reqs[0]);*/
-    // Broadcasting the whole matrix2 to all nodes
-    MPI_Ibcast(matrix2, MATRIX_SIZE * MATRIX_SIZE, MPI_FLOAT,
-        source, MPI_COMM_WORLD, &reqs[1]);
+    //// Broadcasting the whole matrix2 to all nodes
+    //MPI_Ibcast(matrix2, MATRIX_SIZE * MATRIX_SIZE, MPI_FLOAT,
+    //    source, MPI_COMM_WORLD, &reqs[1]);
 
     // Wait for messages to be received
     MPI_Waitall(2, reqs, stats);
