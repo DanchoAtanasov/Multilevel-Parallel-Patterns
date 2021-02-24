@@ -25,7 +25,6 @@ int matrixmult(int start, int end, double additionalOption) {
 // Worker function that calculates matrix multiplication
 void work(float submatrix[][MATRIX_SIZE], int SUBMATRIX_ROWS, float result_matrix[][MATRIX_SIZE]) {
     printf("Working beep boop...\n");
-    printf("SUBMATIX_ROWS:%d, MATRIX_SIZE:%d \n", SUBMATRIX_ROWS, MATRIX_SIZE);
     for (int i = 0; i < SUBMATRIX_ROWS; i++) {
         for (int j = 0; j < MATRIX_SIZE; j++) {
             float c = 0.0f;

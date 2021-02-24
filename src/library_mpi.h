@@ -44,7 +44,7 @@ void broadcast(float matrix[][10], int SIZE) {
 
 void finish() {
     if (rank != 0) {
-        printf("Exiting not main process, rank:%d\n");
+        printf("Exiting not main process, rank:%d\n", rank);
         exit(0);
     }
 }
@@ -88,13 +88,7 @@ int farm(R(*worker)(Args...), const int MATRIX_SIZE, float matrix3[][10]){
     // Wait for messages to be received
     MPI_Waitall(2, reqs, stats);
 
-    //printf("rank: %d, submatrix[0][0]: %.2f\n", rank, submatrix[0][0]);
-    for(int i=0;i<5;i++){
-        for(int j=0;j<10;j++){
-            
-            printf("rank: %d, submatrix[%d][%d]: %.2f\n", rank,i, j, submatrix[i][j]);
-        }
-    }
+    printf("rank: %d, submatrix[0][0]: %.2f\n", rank, submatrix[0][0]);
     //printf("rank: %d, matrix2[0][0]: %.2f\n", rank, matrix2[0][0]);
 
     float result_matrix[SUBMATRIX_ROWS][10];
