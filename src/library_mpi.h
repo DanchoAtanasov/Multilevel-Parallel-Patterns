@@ -108,13 +108,13 @@ int farm(R(*worker)(Args...), const int MATRIX_SIZE, float matrix3[][10]){
     if (rank == 0) {
         MPI_Wait(&reqs[2], &stats[2]);
 
-        printf("Gathered results:\n");
-        for (int i = 0; i < MATRIX_SIZE/10; i++) {
+        //printf("Gathered results:\n");
+        /*for (int i = 0; i < MATRIX_SIZE/10; i++) {
             for (int j = 0; j < MATRIX_SIZE/10; j++) {
                 printf("%.2f ", matrix3[i][j]);
             }
             printf("\n");
-        }
+        }*/
     }
 
     printf("rank: %d finished exectuion.\n", rank);
