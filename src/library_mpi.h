@@ -16,14 +16,14 @@ void init() {
     MPI_Comm_size(MPI_COMM_WORLD, &numtasks);
 }
 
-int load(void(*func)()) {
-    printf("load\n");
+void load(void(*func)()) {
     if (rank == 0) {
+        printf("load\n");
         (*func)();
     }
 }
 
-int scatter(float * matrix1, int SIZE) {
+void scatter(float matrix1[][10], int SIZE) {
     const int SUBMATRIX_ROWS = SIZE / numtasks;
     float submatrix[SUBMATRIX_ROWS][10];
 

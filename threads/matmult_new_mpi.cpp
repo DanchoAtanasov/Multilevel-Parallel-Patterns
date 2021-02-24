@@ -57,7 +57,7 @@ int main() {
             matrix1[i][j] = 2.0f;
             matrix2[i][j] = 3.0f;
         }*/
-
+    init();
     load(init_matrices);
     scatter(matrix1, MATRIX_SIZE);
     //broadcast(matrxi2);
@@ -65,7 +65,7 @@ int main() {
     //int res = farm(3, 100, matrixmult, 35.50);
 
     //int res = farm(foo, matrix1, matrix2, matrix3);
-    int res = farm(work, MATRIX_SIZE, matrix1, matrix2, matrix3);
+//    int res = farm(work, MATRIX_SIZE, matrix1, matrix2, matrix3);
 
 
 
