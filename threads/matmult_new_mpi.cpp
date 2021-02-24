@@ -7,6 +7,8 @@ float matrix1[MATRIX_SIZE][MATRIX_SIZE];
 float matrix2[MATRIX_SIZE][MATRIX_SIZE];
 float matrix3[MATRIX_SIZE][MATRIX_SIZE];
 
+float submatrix[5][MATRIX_SIZE];
+
 
 // Worker function that calculates matrix multiplication
 void work(float submatrix[][MATRIX_SIZE], int SUBMATRIX_ROWS, float result_matrix[][MATRIX_SIZE]) {
@@ -41,7 +43,7 @@ int main() {
         }*/
     init();
     load(init_matrices);
-    scatter(matrix1, MATRIX_SIZE * MATRIX_SIZE);
+    scatter(matrix1, MATRIX_SIZE * MATRIX_SIZE, submatrix);
     broadcast(matrix2, MATRIX_SIZE * MATRIX_SIZE);
 
     //int res = farm(3, 100, matrixmult, 35.50);

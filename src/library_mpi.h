@@ -11,7 +11,7 @@ int numtasks, rank, sendcount, recvcount, source;
 MPI_Request reqs[3];
 MPI_Status stats[3];
 
-float submatrix[5][10]; // Remove this
+//float submatrix[5][10]; // Remove this
 
 void init() {
     MPI_Init(NULL, NULL);
@@ -26,7 +26,7 @@ void load(void(*func)()) {
     }
 }
 
-void scatter(float matrix[][10], int SIZE) {
+void scatter(float matrix[][10], int SIZE, float submatrix[][10]) {
     printf("In scatter\n");
     //const int SUBMATRIX_ROWS = SIZE / numtasks;
     const int SUBMATRIX_TOTAL_SIZE = SIZE / numtasks;
@@ -53,7 +53,7 @@ void finish() {
 }
 
 template<typename R, typename... Args>
-int farm(R(*worker)(Args...), const int MATRIX_SIZE, float matrix3[][10]){ 
+int farm(R(*worker)(Args...), const int MATRIX_SIZE, float submatrix[][10], float matrix3[][10]){
     printf("In farm\n");
 	/*int numtasks, rank, sendcount, recvcount, source;
 
@@ -107,14 +107,6 @@ int farm(R(*worker)(Args...), const int MATRIX_SIZE, float matrix3[][10]){
 
     if (rank == 0) {
         MPI_Wait(&reqs[2], &stats[2]);
-
-        //printf("Gathered results:\n");
-        /*for (int i = 0; i < MATRIX_SIZE/10; i++) {
-            for (int j = 0; j < MATRIX_SIZE/10; j++) {
-                printf("%.2f ", matrix3[i][j]);
-            }
-            printf("\n");
-        }*/
     }
 
     printf("rank: %d finished exectuion.\n", rank);
