@@ -64,9 +64,9 @@ int farm(R(*worker)(Args...), const int MATRIX_SIZE, float matrix3[][10]){
 	MPI_Request reqs[3];
 	MPI_Status stats[3];*/
 
-	const int MATRIX_TOTAL_SIZE = MATRIX_SIZE * MATRIX_SIZE;
+	/*const int MATRIX_TOTAL_SIZE = MATRIX_SIZE * MATRIX_SIZE;
 	const int SUBMATRIX_ROWS = MATRIX_SIZE / numtasks;
-	const int SUBMATRIX_TOTAL_SIZE = SUBMATRIX_ROWS * MATRIX_SIZE;
+	const int SUBMATRIX_TOTAL_SIZE = SUBMATRIX_ROWS * MATRIX_SIZE;*/
 	//float submatrix[SUBMATRIX_ROWS][10];
 
 	/*if (rank == 0) {
@@ -77,9 +77,9 @@ int farm(R(*worker)(Args...), const int MATRIX_SIZE, float matrix3[][10]){
 			}
 	}*/
 
-	source = 0;
+	/*source = 0;
 	sendcount = SUBMATRIX_TOTAL_SIZE;
-	recvcount = SUBMATRIX_TOTAL_SIZE;
+	recvcount = SUBMATRIX_TOTAL_SIZE;*/
 
     // Scattering matrix1 to all nodes in chunks
     /*MPI_Iscatter(matrix1, sendcount, MPI_FLOAT, submatrix, recvcount,
@@ -94,13 +94,14 @@ int farm(R(*worker)(Args...), const int MATRIX_SIZE, float matrix3[][10]){
     printf("rank: %d, submatrix[0][0]: %.2f\n", rank, submatrix[0][0]);
     //printf("rank: %d, matrix2[0][0]: %.2f\n", rank, matrix2[0][0]);
 
-    float result_matrix[SUBMATRIX_ROWS][10];
+    const int SUBMATRIX_TOTAL_SIZE = MATRIX_SIZE / numtasks;
+    float result_matrix[SUBMATRIX_TOTAL_SIZE / MATRIX_SIZE][10];
     // Call worker function, save result in result_matrix
     int res = 1;
-     (*worker)(submatrix, SUBMATRIX_ROWS, result_matrix);
+     (*worker)(submatrix, SUBMATRIX_TOTAL_SIZE / MATRIX_SIZE, result_matrix);
 
     // Gather results from all nodes to main node
-    MPI_Igather(result_matrix, sendcount, MPI_FLOAT, matrix3, recvcount,
+    MPI_Igather(result_matrix, SUBMATRIX_TOTAL_SIZE, MPI_FLOAT, matrix3, SUBMATRIX_TOTAL_SIZE,
         MPI_FLOAT, source, MPI_COMM_WORLD, &reqs[2]);
 
     if (rank == 0) {
