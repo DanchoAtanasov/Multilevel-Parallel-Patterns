@@ -68,6 +68,7 @@ int main() {
 
     //int res = farm(foo, matrix1, matrix2, matrix3);
     int res = farm(work, MATRIX_SIZE, matrix3);
+    finish();
 
 
 

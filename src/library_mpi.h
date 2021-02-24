@@ -4,6 +4,7 @@
 
 #include "mpi.h"
 #include <stdio.h>
+#include <stdlib.h>
 
 int numtasks, rank, sendcount, recvcount, source;
 
@@ -39,6 +40,13 @@ void broadcast(float matrix[][10], int SIZE) {
     // Broadcasting the whole matrix2 to all nodes
     MPI_Ibcast(matrix, SIZE * SIZE, MPI_FLOAT,
         0, MPI_COMM_WORLD, &reqs[1]);
+}
+
+void finish() {
+    if (rank != 0) {
+        printf("Exiting not main process, rank:%d\n");
+        exit(0);
+    }
 }
 
 template<typename R, typename... Args>
