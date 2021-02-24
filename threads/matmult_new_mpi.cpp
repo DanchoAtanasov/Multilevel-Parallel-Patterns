@@ -10,7 +10,7 @@ float matrix3[MATRIX_SIZE][MATRIX_SIZE];
 
 // Worker function that calculates matrix multiplication
 void work(float submatrix[][MATRIX_SIZE], int SUBMATRIX_ROWS, float result_matrix[][MATRIX_SIZE]) {
-    printf("Working beep boop...\n");
+    printf("Working beep boop %d...\n", SUBMATRIX_ROWS);
     for (int i = 0; i < SUBMATRIX_ROWS; i++) {
         for (int j = 0; j < MATRIX_SIZE; j++) {
             float c = 0.0f;
@@ -47,7 +47,7 @@ int main() {
     //int res = farm(3, 100, matrixmult, 35.50);
 
     //int res = farm(foo, matrix1, matrix2, matrix3);
-    int res = farm(work, MATRIX_SIZE, matrix3);
+    int res = farm(work, MATRIX_SIZE * MATRIX_SIZE, matrix3);
     finish();
 
 

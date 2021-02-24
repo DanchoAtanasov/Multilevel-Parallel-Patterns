@@ -95,10 +95,11 @@ int farm(R(*worker)(Args...), const int MATRIX_SIZE, float matrix3[][10]){
     //printf("rank: %d, matrix2[0][0]: %.2f\n", rank, matrix2[0][0]);
 
     const int SUBMATRIX_TOTAL_SIZE = MATRIX_SIZE / numtasks;
-    float result_matrix[SUBMATRIX_TOTAL_SIZE / MATRIX_SIZE][10];
+    float result_matrix[SUBMATRIX_TOTAL_SIZE / 10][10];
+    printf("rank: %d, SUBMATRIX_TOTAL_SIZE: %d\n", rank, SUBMATRIX_TOTAL_SIZE);
     // Call worker function, save result in result_matrix
     int res = 1;
-     (*worker)(submatrix, SUBMATRIX_TOTAL_SIZE / MATRIX_SIZE, result_matrix);
+     (*worker)(submatrix, SUBMATRIX_TOTAL_SIZE / 10, result_matrix);
 
     // Gather results from all nodes to main node
     MPI_Igather(result_matrix, SUBMATRIX_TOTAL_SIZE, MPI_FLOAT, matrix3, SUBMATRIX_TOTAL_SIZE,
@@ -108,8 +109,8 @@ int farm(R(*worker)(Args...), const int MATRIX_SIZE, float matrix3[][10]){
         MPI_Wait(&reqs[2], &stats[2]);
 
         printf("Gathered results:\n");
-        for (int i = 0; i < MATRIX_SIZE; i++) {
-            for (int j = 0; j < MATRIX_SIZE; j++) {
+        for (int i = 0; i < MATRIX_SIZE/10; i++) {
+            for (int j = 0; j < MATRIX_SIZE/10; j++) {
                 printf("%.2f ", matrix3[i][j]);
             }
             printf("\n");
