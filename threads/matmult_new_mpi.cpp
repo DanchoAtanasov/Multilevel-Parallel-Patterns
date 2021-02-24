@@ -25,10 +25,12 @@ int matrixmult(int start, int end, double additionalOption) {
 // Worker function that calculates matrix multiplication
 void work(float submatrix[][MATRIX_SIZE], int SUBMATRIX_ROWS, float result_matrix[][MATRIX_SIZE]) {
     printf("Working beep boop...\n");
+    printf("SUBMATIX_ROWS:%d, MATRIX_SIZE:%d \n", SUBMATRIX_ROWS, MATRIX_SIZE);
     for (int i = 0; i < SUBMATRIX_ROWS; i++) {
         for (int j = 0; j < MATRIX_SIZE; j++) {
             float c = 0.0f;
             for (int k = 0; k < MATRIX_SIZE; k++) {
+                //printf("sub:%f, m2:%f\n", submatrix[i][k], matrix2[k][j]);
                 c += submatrix[i][k] * matrix2[k][j];
                 result_matrix[i][j] = c;
             }
@@ -60,12 +62,12 @@ int main() {
     init();
     load(init_matrices);
     scatter(matrix1, MATRIX_SIZE);
-    //broadcast(matrxi2);
+    broadcast(matrix2, MATRIX_SIZE);
 
     //int res = farm(3, 100, matrixmult, 35.50);
 
     //int res = farm(foo, matrix1, matrix2, matrix3);
-//    int res = farm(work, MATRIX_SIZE, matrix1, matrix2, matrix3);
+    int res = farm(work, MATRIX_SIZE, matrix3);
 
 
 

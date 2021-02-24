@@ -26,11 +26,12 @@ void load(void(*func)()) {
 }
 
 void scatter(float matrix[][10], int SIZE) {
-    /*const int SUBMATRIX_ROWS = SIZE / numtasks;
-    float submatrix[SUBMATRIX_ROWS][10];*/
+    const int SUBMATRIX_ROWS = SIZE / numtasks;
+    const int SUBMATRIX_TOTAL_SIZE = SUBMATRIX_ROWS * SIZE;
+    //float submatrix[SUBMATRIX_ROWS][10];
 
     // Scattering matrix1 to all nodes in chunks
-    MPI_Iscatter(matrix, SUBMATRIX_ROWS, MPI_FLOAT, submatrix, SUBMATRIX_ROWS,
+    MPI_Iscatter(matrix, SUBMATRIX_TOTAL_SIZE, MPI_FLOAT, submatrix, SUBMATRIX_TOTAL_SIZE,
         MPI_FLOAT, 0, MPI_COMM_WORLD, &reqs[0]);
 }
 
@@ -79,8 +80,14 @@ int farm(R(*worker)(Args...), const int MATRIX_SIZE, float matrix3[][10]){
     // Wait for messages to be received
     MPI_Waitall(2, reqs, stats);
 
-    printf("rank: %d, submatrix[0][0]: %.2f\n", rank, submatrix[0][0]);
-    printf("rank: %d, matrix2[0][0]: %.2f\n", rank, matrix2[0][0]);
+    //printf("rank: %d, submatrix[0][0]: %.2f\n", rank, submatrix[0][0]);
+    for(int i=0;i<5;i++){
+        for(int j=0;j<10;j++){
+            
+            printf("rank: %d, submatrix[%d][%d]: %.2f\n", rank,i, j, submatrix[i][j]);
+        }
+    }
+    //printf("rank: %d, matrix2[0][0]: %.2f\n", rank, matrix2[0][0]);
 
     float result_matrix[SUBMATRIX_ROWS][10];
     // Call worker function, save result in result_matrix
