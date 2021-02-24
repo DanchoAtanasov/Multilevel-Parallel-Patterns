@@ -27,8 +27,8 @@ void load(void(*func)()) {
 }
 
 void scatter(float matrix[][10], int SIZE) {
-    const int SUBMATRIX_ROWS = SIZE / numtasks;
-    const int SUBMATRIX_TOTAL_SIZE = SUBMATRIX_ROWS * SIZE;
+    //const int SUBMATRIX_ROWS = SIZE / numtasks;
+    const int SUBMATRIX_TOTAL_SIZE = SIZE * SIZE / numtasks;
     //float submatrix[SUBMATRIX_ROWS][10];
 
     // Scattering matrix1 to all nodes in chunks
@@ -38,7 +38,7 @@ void scatter(float matrix[][10], int SIZE) {
 
 void broadcast(float matrix[][10], int SIZE) {
     // Broadcasting the whole matrix2 to all nodes
-    MPI_Ibcast(matrix, SIZE * SIZE, MPI_FLOAT,
+    MPI_Ibcast(matrix, SIZE, MPI_FLOAT,
         0, MPI_COMM_WORLD, &reqs[1]);
 }
 

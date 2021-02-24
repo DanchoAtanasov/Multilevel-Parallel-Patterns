@@ -7,20 +7,6 @@ float matrix1[MATRIX_SIZE][MATRIX_SIZE];
 float matrix2[MATRIX_SIZE][MATRIX_SIZE];
 float matrix3[MATRIX_SIZE][MATRIX_SIZE];
 
-int matrixmult(int start, int end, double additionalOption) {
-    printf("In matrixmult with %d %d\n", start, end);
-    printf("additionalOption: %.2f\n", additionalOption);
-    for (int i = start; i < end; i++) {
-        for (int j = 0; j < MATRIX_SIZE; j++) {
-            float c = 0.0f;
-            for (int k = 0; k < MATRIX_SIZE; k++) {
-                c += matrix1[i][k] * matrix2[k][j];
-            }
-            matrix3[i][j] = c;
-        }
-    }
-    return 1;
-}
 
 // Worker function that calculates matrix multiplication
 void work(float submatrix[][MATRIX_SIZE], int SUBMATRIX_ROWS, float result_matrix[][MATRIX_SIZE]) {
@@ -35,11 +21,6 @@ void work(float submatrix[][MATRIX_SIZE], int SUBMATRIX_ROWS, float result_matri
             }
         }
     }
-}
-
-int foo() {
-    printf("In Foo!\n");
-    return 1;
 }
 
 void init_matrices() {
@@ -60,8 +41,8 @@ int main() {
         }*/
     init();
     load(init_matrices);
-    scatter(matrix1, MATRIX_SIZE);
-    broadcast(matrix2, MATRIX_SIZE);
+    scatter(matrix1, MATRIX_SIZE * MATRIX_SIZE);
+    broadcast(matrix2, MATRIX_SIZE * MATRIX_SIZE);
 
     //int res = farm(3, 100, matrixmult, 35.50);
 
