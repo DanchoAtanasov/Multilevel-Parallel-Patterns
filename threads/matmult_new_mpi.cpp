@@ -49,7 +49,7 @@ int main() {
     //int res = farm(3, 100, matrixmult, 35.50);
 
     //int res = farm(foo, matrix1, matrix2, matrix3);
-    int res = farm(work, MATRIX_SIZE * MATRIX_SIZE, matrix3);
+    int res = farm(work, MATRIX_SIZE * MATRIX_SIZE, submatrix, matrix3);
     finish();
 
     printf("First and last values in the matrix are: %.0f, %.0f\n", matrix3[0][0], matrix3[MATRIX_SIZE - 1][MATRIX_SIZE - 1]);
