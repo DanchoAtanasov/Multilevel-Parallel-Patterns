@@ -21,14 +21,16 @@ void init() {
 
 void load(void(*func)()) {
     if (rank == 0) {
-        printf("load\n");
+        printf("In load\n");
         (*func)();
     }
 }
 
 void scatter(float matrix[][10], int SIZE) {
+    printf("In scatter\n");
     //const int SUBMATRIX_ROWS = SIZE / numtasks;
-    const int SUBMATRIX_TOTAL_SIZE = SIZE * SIZE / numtasks;
+    const int SUBMATRIX_TOTAL_SIZE = SIZE / numtasks;
+    printf("SUBMATRIX:%d\n", SUBMATRIX_TOTAL_SIZE);
     //float submatrix[SUBMATRIX_ROWS][10];
 
     // Scattering matrix1 to all nodes in chunks
@@ -37,6 +39,7 @@ void scatter(float matrix[][10], int SIZE) {
 }
 
 void broadcast(float matrix[][10], int SIZE) {
+    printf("In broadcast\n");
     // Broadcasting the whole matrix2 to all nodes
     MPI_Ibcast(matrix, SIZE, MPI_FLOAT,
         0, MPI_COMM_WORLD, &reqs[1]);
