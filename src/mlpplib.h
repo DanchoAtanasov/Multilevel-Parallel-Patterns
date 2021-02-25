@@ -53,18 +53,18 @@ template<typename R, typename... Args>
 void* worker_wrapper(void* threadarg) {
     thread_data<R, Args...>* my_data = (thread_data<R, Args...>*) threadarg;
     int tid = my_data->thread_id;
-    printf("Working thread: %d\n", tid);
+    printf("rank %d -> Working thread: %d\n", rank, tid);
 
     R res = my_data->run_worker();
 
-    printf("Thread %ld done with res: %d.\n", tid, res);
+    printf("rank %d -> Thread %ld done with res: %d.\n", rank, tid, res);
     pthread_exit(NULL);
 }
 
 // Farm function that calls 'worker' function on 'input_array' with length 'input_len'
 template<typename R, typename... Args, typename... AArgs>
 int farm(int NUM_THREADS, int input_len, R(*worker)(Args...), AArgs... args) {
-    printf("In farm with num args: %d\n", sizeof...(AArgs));
+    printf("rank %d -> In farm with num args: %d\n", rank, sizeof...(AArgs));
     //printf("NUM_THREADS: %d, input_len: %d\n", NUM_THREADS, input_len);
 
     //int * result = (int*)malloc(input_len * sizeof(int));
@@ -73,7 +73,7 @@ int farm(int NUM_THREADS, int input_len, R(*worker)(Args...), AArgs... args) {
     // If there are more threads requested than the array_lenght reduce threads
     if (NUM_THREADS > input_len) NUM_THREADS = input_len;
 
-    printf("NUM_THREADS: %d\n", NUM_THREADS);
+    printf("rank %d -> NUM_THREADS: %d\n", rank, NUM_THREADS);
 
     // Initialize array of threads 
     pthread_t threads[NUM_THREADS];
@@ -111,7 +111,7 @@ int farm(int NUM_THREADS, int input_len, R(*worker)(Args...), AArgs... args) {
             printf("ERROR; return code from pthread_join() is %d\n", rc);
             exit(-1);
         }
-        printf("Main: completed join with thread %ld\n", t);
+        printf("rank %d -> Completed join with thread %ld\n", rank, t);
     }
 
     // Last thing that main() should do
@@ -129,13 +129,13 @@ void init() {
 
 void load(void(*func)()) {
     if (rank == 0) {
-        printf("In load\n");
+        printf("rank %d -> In load\n", rank);
         (*func)();
     }
 }
 
 void scatter(float matrix[][8], int SIZE, float submatrix[][8]) {
-    printf("In scatter\n");
+    printf("rank %d -> In scatter\n", rank);
     const int SUBMATRIX_TOTAL_SIZE = SIZE / numtasks;
 
     // Scattering matrix1 to all nodes in chunks
@@ -144,14 +144,14 @@ void scatter(float matrix[][8], int SIZE, float submatrix[][8]) {
 }
 
 void broadcast(float matrix[][8], int SIZE) {
-    printf("In broadcast\n");
+    printf("rank %d -> In broadcast\n", rank);
     // Broadcasting the whole matrix2 to all nodes
     MPI_Bcast(matrix, SIZE, MPI_FLOAT,
         0, MPI_COMM_WORLD);
 }
 
 void gather(float result_matrix[][8], int SIZE, float matrix[][8]) {
-    printf("In gather\n");
+    printf("rank %d -> In gather\n", rank);
     const int SUBMATRIX_TOTAL_SIZE = SIZE / numtasks;
 
     // Gather results from all nodes to main node
@@ -160,16 +160,16 @@ void gather(float result_matrix[][8], int SIZE, float matrix[][8]) {
 
     if (rank == 0) {
         MPI_Wait(&reqs[0], &stats[0]);
-        printf("Finished gathering\n");
+        printf("rank %d -> Finished gathering\n", rank);
     }
 }
 
 void finish() {
-    printf("rank: %d finished exectuion.\n", rank);
+    printf("rank %d -> Finished exectuion.\n", rank);
     MPI_Finalize();
     
     if (rank != 0) {
-        printf("Exiting not main process, rank:%d\n", rank);
+        printf("rank %d -> Exiting not-main process\n", rank);
         exit(0);
     }
 
@@ -177,13 +177,13 @@ void finish() {
 
 template<typename R, typename... Args>
 int mpi_farm(R(*worker)(Args...), const int MATRIX_SIZE, float submatrix[][8], float matrix3[][8]) {
-    printf("In farm\n");
+    printf("rank %d -> In farm\n", rank);
 
-    printf("rank: %d, submatrix[0][0]: %.2f\n", rank, submatrix[0][0]);
+    printf("rank %d -> submatrix[0][0]: %.2f\n", rank, submatrix[0][0]);
 
     const int SUBMATRIX_TOTAL_SIZE = MATRIX_SIZE / numtasks;
     float result_matrix[SUBMATRIX_TOTAL_SIZE / 8][8];
-    printf("rank: %d, SUBMATRIX_TOTAL_SIZE: %d\n", rank, SUBMATRIX_TOTAL_SIZE);
+    printf("rank %d -> SUBMATRIX_TOTAL_SIZE: %d\n", rank, SUBMATRIX_TOTAL_SIZE);
 
     // Call worker function, save result in result_matrix
     int res = 1;
@@ -197,7 +197,7 @@ int mpi_farm(R(*worker)(Args...), const int MATRIX_SIZE, float submatrix[][8], f
         MPI_Wait(&reqs[0], &stats[0]);
     }
 
-    printf("rank: %d finished exectuion.\n", rank);
+    printf("rank %d -> finished exectuion.\n", rank);
 
     MPI_Finalize();
 
