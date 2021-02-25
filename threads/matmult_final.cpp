@@ -8,6 +8,8 @@ float matrix2[MATRIX_SIZE][MATRIX_SIZE];
 float matrix3[MATRIX_SIZE][MATRIX_SIZE];
 
 float submatrix[4][MATRIX_SIZE];
+float result[4][MATRIX_SIZE];
+
 
 int matrixmult(int start, int end, double additionalOption) {
     printf("In matrixmult with %d %d\n", start, end);
@@ -18,7 +20,8 @@ int matrixmult(int start, int end, double additionalOption) {
             for (int k = 0; k < MATRIX_SIZE; k++) {
                 c += submatrix[i][k] * matrix2[k][j];
             }
-            matrix3[i][j] = c;
+            //matrix3[i][j] = c;
+            result[i][j] = c;
         }
     }
     return 1;
@@ -59,6 +62,7 @@ int main() {
     //int res = mpi_farm(work, MATRIX_SIZE * MATRIX_SIZE, submatrix, matrix3);
     // pthread farm
     int res = farm(2, 4, matrixmult, 35.50);
+    gather(result, MATRIX_SIZE * MATRIX_SIZE, matrix3);
     finish();
 
     printf("First and last values in the matrix are: %.0f, %.0f\n", matrix3[0][0], matrix3[MATRIX_SIZE - 1][MATRIX_SIZE - 1]);

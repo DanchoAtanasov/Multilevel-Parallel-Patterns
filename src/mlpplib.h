@@ -150,11 +150,27 @@ void broadcast(float matrix[][8], int SIZE) {
         0, MPI_COMM_WORLD);
 }
 
+void gather(float result_matrix[][8], int SIZE, float matrix[][8]) {
+    printf("In gather\n");
+    const int SUBMATRIX_TOTAL_SIZE = SIZE / numtasks;
+
+    // Gather results from all nodes to main node
+    MPI_Igather(result_matrix, SUBMATRIX_TOTAL_SIZE, MPI_FLOAT, matrix, SUBMATRIX_TOTAL_SIZE,
+        MPI_FLOAT, source, MPI_COMM_WORLD, &reqs[0]);
+
+    if (rank == 0) {
+        MPI_Wait(&reqs[0], &stats[0]);
+    }
+}
+
 void finish() {
+    printf("rank: %d finished exectuion.\n", rank);
     if (rank != 0) {
         printf("Exiting not main process, rank:%d\n", rank);
         exit(0);
     }
+
+    MPI_Finalize();
 }
 
 template<typename R, typename... Args>
