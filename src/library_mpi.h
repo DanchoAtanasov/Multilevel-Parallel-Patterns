@@ -28,21 +28,22 @@ void load(void(*func)()) {
 
 void scatter(float matrix[][10], int SIZE, float submatrix[][10]) {
     printf("In scatter\n");
-    //const int SUBMATRIX_ROWS = SIZE / numtasks;
     const int SUBMATRIX_TOTAL_SIZE = SIZE / numtasks;
-    printf("SUBMATRIX:%d\n", SUBMATRIX_TOTAL_SIZE);
-    //float submatrix[SUBMATRIX_ROWS][10];
 
     // Scattering matrix1 to all nodes in chunks
-    MPI_Iscatter(matrix, SUBMATRIX_TOTAL_SIZE, MPI_FLOAT, submatrix, SUBMATRIX_TOTAL_SIZE,
-        MPI_FLOAT, 0, MPI_COMM_WORLD, &reqs[0]);
+    MPI_Scatter(matrix, SUBMATRIX_TOTAL_SIZE, MPI_FLOAT, submatrix, SUBMATRIX_TOTAL_SIZE,
+        MPI_FLOAT, 0, MPI_COMM_WORLD);
+    /*MPI_Iscatter(matrix, SUBMATRIX_TOTAL_SIZE, MPI_FLOAT, submatrix, SUBMATRIX_TOTAL_SIZE,
+        MPI_FLOAT, 0, MPI_COMM_WORLD, &reqs[0]);*/
 }
 
 void broadcast(float matrix[][10], int SIZE) {
     printf("In broadcast\n");
     // Broadcasting the whole matrix2 to all nodes
-    MPI_Ibcast(matrix, SIZE, MPI_FLOAT,
-        0, MPI_COMM_WORLD, &reqs[1]);
+    MPI_Bcast(matrix, SIZE, MPI_FLOAT,
+        0, MPI_COMM_WORLD);
+    /*MPI_Ibcast(matrix, SIZE, MPI_FLOAT,
+        0, MPI_COMM_WORLD, &reqs[1]);*/
 }
 
 void finish() {
@@ -89,7 +90,7 @@ int farm(R(*worker)(Args...), const int MATRIX_SIZE, float submatrix[][10], floa
     //    source, MPI_COMM_WORLD, &reqs[1]);
 
     // Wait for messages to be received
-    MPI_Waitall(2, reqs, stats);
+    //MPI_Waitall(2, reqs, stats);
 
     printf("rank: %d, submatrix[0][0]: %.2f\n", rank, submatrix[0][0]);
     //printf("rank: %d, matrix2[0][0]: %.2f\n", rank, matrix2[0][0]);
