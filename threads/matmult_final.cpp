@@ -55,7 +55,10 @@ int main() {
     load(init_matrices);
     scatter(matrix1, MATRIX_SIZE * MATRIX_SIZE, submatrix);
     broadcast(matrix2, MATRIX_SIZE * MATRIX_SIZE);
-    int res = mpi_farm(work, MATRIX_SIZE * MATRIX_SIZE, submatrix, matrix3);
+    // MPI farm
+    //int res = mpi_farm(work, MATRIX_SIZE * MATRIX_SIZE, submatrix, matrix3);
+    // pthread farm
+    int res = farm(2, 4, matrixmult, 35.50);
     finish();
 
     printf("First and last values in the matrix are: %.0f, %.0f\n", matrix3[0][0], matrix3[MATRIX_SIZE - 1][MATRIX_SIZE - 1]);
