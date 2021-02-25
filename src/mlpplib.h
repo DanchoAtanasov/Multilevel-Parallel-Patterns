@@ -160,17 +160,19 @@ void gather(float result_matrix[][8], int SIZE, float matrix[][8]) {
 
     if (rank == 0) {
         MPI_Wait(&reqs[0], &stats[0]);
+        printf("Finished gathering\n");
     }
 }
 
 void finish() {
     printf("rank: %d finished exectuion.\n", rank);
+    MPI_Finalize();
+    
     if (rank != 0) {
         printf("Exiting not main process, rank:%d\n", rank);
         exit(0);
     }
 
-    MPI_Finalize();
 }
 
 template<typename R, typename... Args>
