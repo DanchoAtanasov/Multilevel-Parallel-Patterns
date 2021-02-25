@@ -36,19 +36,11 @@ void init_matrices() {
 
 int main() {
     printf("Beginning of main\n");
-    /*for (int i = 0; i < MATRIX_SIZE; i++)
-        for (int j = 0; j < MATRIX_SIZE; j++) {
-            matrix1[i][j] = 2.0f;
-            matrix2[i][j] = 3.0f;
-        }*/
+    
     init();
     load(init_matrices);
     scatter(matrix1, MATRIX_SIZE * MATRIX_SIZE, submatrix);
     broadcast(matrix2, MATRIX_SIZE * MATRIX_SIZE);
-
-    //int res = farm(3, 100, matrixmult, 35.50);
-
-    //int res = farm(foo, matrix1, matrix2, matrix3);
     int res = farm(work, MATRIX_SIZE * MATRIX_SIZE, submatrix, matrix3);
     finish();
 
