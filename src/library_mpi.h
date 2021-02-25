@@ -104,7 +104,7 @@ int farm(R(*worker)(Args...), const int MATRIX_SIZE, float submatrix[][10], floa
 
     // Gather results from all nodes to main node
     MPI_Igather(result_matrix, SUBMATRIX_TOTAL_SIZE, MPI_FLOAT, matrix3, SUBMATRIX_TOTAL_SIZE,
-        MPI_FLOAT, source, MPI_COMM_WORLD, &reqs[2]);
+        MPI_FLOAT, source, MPI_COMM_WORLD, &reqs[0]);
 
     if (rank == 0) {
         MPI_Wait(&reqs[0], &stats[0]);
