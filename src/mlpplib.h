@@ -91,10 +91,10 @@ int farm(int NUM_THREADS, int input_len, R(*worker)(Args...), AArgs... args) {
     int start = rank * batch_size;
     int end = (rank + 1) * batch_size;
     if (rank == numtasks - 1) end = input_len;
-    int _batch_size = batch / NUM_THREADS;
+    int _batch_size = batch_size / NUM_THREADS;
     for (int t = 0; t < NUM_THREADS; t++) {
-        int _start = start + t * _batch;
-        int _end = start + (t + 1) * _batch;
+        int _start = start + t * _batch_size;
+        int _end = start + (t + 1) * _batch_size;
         //int start = t * batch_size;
         //int end = start + batch_size;
         if (t == NUM_THREADS - 1) _end = end; // add remainder
