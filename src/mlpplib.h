@@ -97,7 +97,7 @@ int farm(int NUM_THREADS, int input_len, R(*worker)(Args...), AArgs... args) {
         int end = (t + 1) * batch_size;
         //int start = t * batch_size;
         //int end = start + batch_size;
-        if (t == NUM_THREADS - 1) end = input_len / NUM_THREADS; // add remainder
+        if (t == NUM_THREADS - 1) end = input_len / NUM_THREADS + input_len % NUM_THREADS; // add remainder
         printf("rank %d -> new thread with t:%d, start:%d, end:%d\n", rank, t, start, end);
         thread_data_array[t].thread_id = t;
         thread_data_array[t].worker = worker;
@@ -181,34 +181,5 @@ void finish() {
     }
 
 }
-
-//template<typename R, typename... Args>
-//int mpi_farm(R(*worker)(Args...), const int MATRIX_SIZE, float submatrix[][8], float matrix3[][8]) {
-//    printf("rank %d -> In farm\n", rank);
-//
-//    printf("rank %d -> submatrix[0][0]: %.2f\n", rank, submatrix[0][0]);
-//
-//    const int SUBMATRIX_TOTAL_SIZE = MATRIX_SIZE / numtasks;
-//    float result_matrix[SUBMATRIX_TOTAL_SIZE / 8][8];
-//    printf("rank %d -> SUBMATRIX_TOTAL_SIZE: %d\n", rank, SUBMATRIX_TOTAL_SIZE);
-//
-//    // Call worker function, save result in result_matrix
-//    int res = 1;
-//    (*worker)(submatrix, SUBMATRIX_TOTAL_SIZE / 8, result_matrix);
-//
-//    // Gather results from all nodes to main node
-//    MPI_Igather(result_matrix, SUBMATRIX_TOTAL_SIZE, MPI_FLOAT, matrix3, SUBMATRIX_TOTAL_SIZE,
-//        MPI_FLOAT, source, MPI_COMM_WORLD, &reqs[0]);
-//
-//    if (rank == 0) {
-//        MPI_Wait(&reqs[0], &stats[0]);
-//    }
-//
-//    printf("rank %d -> finished exectuion.\n", rank);
-//
-//    MPI_Finalize();
-//
-//    return res;
-//}
 
 #endif
