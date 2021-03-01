@@ -88,13 +88,20 @@ int farm(int NUM_THREADS, int input_len, R(*worker)(Args...), AArgs... args) {
 
     int rc;
     int batch_size = input_len / NUM_THREADS;
+    int start = rank * batch_size;
+    int end = (rank + 1) * batch_size;
+    if (rank == numtasks - 1) end = input_len;
+    int _batch_size = batch / NUM_THREADS;
     for (int t = 0; t < NUM_THREADS; t++) {
-        int start = t * batch_size;
-        int end = start + batch_size;
-        if (t == NUM_THREADS - 1) end = input_len; // add remainder
+        int _start = start + t * _batch;
+        int _end = start + (t + 1) * _batch;
+        //int start = t * batch_size;
+        //int end = start + batch_size;
+        if (t == NUM_THREADS - 1) _end = end; // add remainder
+        printf("rank %d -> new thread with t:%d, start:%d, end:%d\n", rank, t, _start, _end);
         thread_data_array[t].thread_id = t;
         thread_data_array[t].worker = worker;
-        thread_data_array[t].args = std::tuple<Args...>(start, end, args...);
+        thread_data_array[t].args = std::tuple<Args...>(_start, _end, args...);
 
         rc = pthread_create(&threads[t], &attr, worker_wrapper<R, Args...>, (void*)&thread_data_array[t]);
         if (rc) {
