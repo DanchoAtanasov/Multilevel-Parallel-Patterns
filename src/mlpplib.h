@@ -87,21 +87,21 @@ int farm(int NUM_THREADS, int input_len, R(*worker)(Args...), AArgs... args) {
     pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
 
     int rc;
-    int batch_size = input_len / NUM_THREADS;
-    int start = rank * batch_size;
-    int end = (rank + 1) * batch_size;
-    if (rank == numtasks - 1) end = input_len;
-    int _batch_size = batch_size / NUM_THREADS;
+    int batch_size = (input_len / numtasks) / NUM_THREADS;
+    //int start = rank * batch_size;
+    //int end = (rank + 1) * batch_size;
+    //if (rank == numtasks - 1) end = input_len;
+    //int _batch_size = batch_size / NUM_THREADS;
     for (int t = 0; t < NUM_THREADS; t++) {
-        int _start = start + t * _batch_size;
-        int _end = start + (t + 1) * _batch_size;
+        int start = t * batch_size;
+        int end = (t + 1) * batch_size;
         //int start = t * batch_size;
         //int end = start + batch_size;
-        if (t == NUM_THREADS - 1) _end = end; // add remainder
-        printf("rank %d -> new thread with t:%d, start:%d, end:%d\n", rank, t, _start, _end);
+        if (t == NUM_THREADS - 1) end = input_len / NUM_THREADS; // add remainder
+        printf("rank %d -> new thread with t:%d, start:%d, end:%d\n", rank, t, start, end);
         thread_data_array[t].thread_id = t;
         thread_data_array[t].worker = worker;
-        thread_data_array[t].args = std::tuple<Args...>(_start, _end, args...);
+        thread_data_array[t].args = std::tuple<Args...>(start, end, args...);
 
         rc = pthread_create(&threads[t], &attr, worker_wrapper<R, Args...>, (void*)&thread_data_array[t]);
         if (rc) {
