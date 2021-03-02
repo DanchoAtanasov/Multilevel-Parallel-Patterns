@@ -141,7 +141,8 @@ void load(void(*func)()) {
     }
 }
 
-void scatter(float matrix[][8], int SIZE, float submatrix[][8]) {
+template <typename T, size_t size>
+void scatter(const T (&matrix)[][size], int SIZE, const T (&matrix)[][size]) {
     printf("rank %d -> In scatter\n", rank);
     const int SUBMATRIX_TOTAL_SIZE = SIZE / numtasks;
 
@@ -149,6 +150,15 @@ void scatter(float matrix[][8], int SIZE, float submatrix[][8]) {
     MPI_Scatter(matrix, SUBMATRIX_TOTAL_SIZE, MPI_FLOAT, submatrix, SUBMATRIX_TOTAL_SIZE,
         MPI_FLOAT, 0, MPI_COMM_WORLD);
 }
+
+//void scatter(float matrix[][8], int SIZE, float submatrix[][8]) {
+//    printf("rank %d -> In scatter\n", rank);
+//    const int SUBMATRIX_TOTAL_SIZE = SIZE / numtasks;
+//
+//    // Scattering matrix1 to all nodes in chunks
+//    MPI_Scatter(matrix, SUBMATRIX_TOTAL_SIZE, MPI_FLOAT, submatrix, SUBMATRIX_TOTAL_SIZE,
+//        MPI_FLOAT, 0, MPI_COMM_WORLD);
+//}
 
 void broadcast(float matrix[][8], int SIZE) {
     printf("rank %d -> In broadcast\n", rank);
