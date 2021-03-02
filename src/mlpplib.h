@@ -141,8 +141,8 @@ void load(void(*func)()) {
     }
 }
 
-template <typename T, size_t size>
-void scatter(const T (&matrix)[][size], int SIZE, const T (&matrix)[][size]) {
+template <typename T, size_t size, size_t size2>
+void scatter(T (&matrix)[size], int SIZE, T (&submatrix)[size2]) {
     printf("rank %d -> In scatter\n", rank);
     const int SUBMATRIX_TOTAL_SIZE = SIZE / numtasks;
 
