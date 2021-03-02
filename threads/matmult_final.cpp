@@ -18,6 +18,7 @@ int matrixmult(int start, int end, double additionalOption) {
         for (int j = 0; j < MATRIX_SIZE; j++) {
             float c = 0.0f;
             for (int k = 0; k < MATRIX_SIZE; k++) {
+//                printf("sm[%d][%d]:%.2f + m2[%d][%d]:%.2f\n", i, k, submatrix[i][k], k, j, matrix2[k][j]);
                 c += submatrix[i][k] * matrix2[k][j];
             }
             result[i][j] = c;
