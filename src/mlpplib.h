@@ -168,8 +168,8 @@ void broadcast(T(&matrix)[size], int SIZE) {
         0, MPI_COMM_WORLD);
 }
 
-template <typename T, size_t size>
-void gather(T (&result_matrix)[size], int SIZE, T (&matrix)[size]) {
+template <typename T, size_t size, size_t size2>
+void gather(T (&result_matrix)[size], int SIZE, T (&matrix)[size2]) {
     printf("rank %d -> In gather\n", rank);
     const int SUBMATRIX_TOTAL_SIZE = SIZE / numtasks;
 
