@@ -8,6 +8,7 @@
 #include "mpi.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <type_traits>
 
 const int MAX_THREADS = 16;
 
@@ -144,6 +145,7 @@ void load(void(*func)()) {
 template <typename T, size_t size, size_t size2>
 void scatter(T (&matrix)[size], int SIZE, T (&submatrix)[size2]) {
     printf("rank %d -> In scatter\n", rank);
+    if (std::is_same<T, float>::value) { printf("DANCHO E GOTING PICHAGA\n"); }
     const int SUBMATRIX_TOTAL_SIZE = SIZE / numtasks;
 
     // Scattering matrix1 to all nodes in chunks
