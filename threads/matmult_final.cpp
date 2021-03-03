@@ -2,13 +2,14 @@
 #include "../src/mlpplib.h"
 
 const int MATRIX_SIZE = 8;
+const int NODES = 2;
 
 float matrix1[MATRIX_SIZE][MATRIX_SIZE];
 float matrix2[MATRIX_SIZE][MATRIX_SIZE];
 float matrix3[MATRIX_SIZE][MATRIX_SIZE];
 
-float submatrix[4][MATRIX_SIZE];
-float result[4][MATRIX_SIZE];
+float submatrix[MATRIX_SIZE/NODES][MATRIX_SIZE];
+float result[MATRIX_SIZE/NODES][MATRIX_SIZE];
 
 
 int matrixmult(int start, int end, double additionalOption) {
@@ -46,7 +47,7 @@ int main() {
         for(int j=0;j<8;j++)
             printf("sm[%d][%d]:%.2f\n", i, j, submatrix[i][j]);*/
     broadcast(matrix2, MATRIX_SIZE * MATRIX_SIZE);
-    int res = farm(2, 8, matrixmult, 35.50);
+    int res = farm(3, MATRIX_SIZE, matrixmult, 35.50);
     gather(result, MATRIX_SIZE * MATRIX_SIZE, matrix3);
     finish();
 

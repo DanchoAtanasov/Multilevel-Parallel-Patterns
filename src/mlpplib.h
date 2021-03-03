@@ -71,7 +71,7 @@ int farm(int NUM_THREADS, int input_len, R(*worker)(Args...), AArgs... args) {
     //free(result)
 
     // If there are more threads requested than the array_lenght reduce threads
-    if (NUM_THREADS > input_len) NUM_THREADS = input_len;
+    if (NUM_THREADS > input_len) NUM_THREADS = input_len; //TODO if input_len % numtasks != 0
 
     printf("rank %d -> NUM_THREADS: %d\n", rank, NUM_THREADS);
 
@@ -97,7 +97,7 @@ int farm(int NUM_THREADS, int input_len, R(*worker)(Args...), AArgs... args) {
         int end = (t + 1) * batch_size;
         //int start = t * batch_size;
         //int end = start + batch_size;
-        if (t == NUM_THREADS - 1) end = input_len / NUM_THREADS + input_len % NUM_THREADS; // add remainder
+        if (t == NUM_THREADS - 1) end = input_len / numtasks + input_len % numtasks; // add remainder
         printf("rank %d -> new thread with t:%d, start:%d, end:%d\n", rank, t, start, end);
         thread_data_array[t].thread_id = t;
         thread_data_array[t].worker = worker;
