@@ -145,7 +145,8 @@ void load(void(*func)()) {
 template <typename T, size_t size, size_t size2>
 void scatter(T (&matrix)[size], int SIZE, T (&submatrix)[size2]) {
     printf("rank %d -> In scatter\n", rank);
-    if (std::is_same<T, float>::value) { printf("DANCHO E GOTING PICHAGA\n"); }
+    if (std::is_same<T, float[size]>::value) { printf("DANCHO E GOTING PICHAGA\n"); }
+    else printf("DANCHO e lame \n");
     const int SUBMATRIX_TOTAL_SIZE = SIZE / numtasks;
 
     // Scattering matrix1 to all nodes in chunks
