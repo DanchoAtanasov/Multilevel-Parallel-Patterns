@@ -140,6 +140,12 @@ MPI_Datatype resolveType<float>()
     return MPI_FLOAT;
 }
 
+template <>
+MPI_Datatype resolveType<int>()
+{
+    return MPI_INT;
+}
+
 void init() {
     MPI_Init(NULL, NULL);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
@@ -160,11 +166,14 @@ void scatter(T (&matrix)[size], int SIZE, T (&submatrix)[size2]) {
     else printf("DANCHO e lame \n");
     const int SUBMATRIX_TOTAL_SIZE = SIZE / numtasks;
 
+    //T dancho;
+    MPI_Datatype dt = resolveType<typename std::remove_all_extents<T>::type>();
+
     // Scattering matrix1 to all nodes in chunks
-    MPI_Scatter(matrix, SUBMATRIX_TOTAL_SIZE, resolveType<T>, submatrix, SUBMATRIX_TOTAL_SIZE,
+    MPI_Scatter(matrix, SUBMATRIX_TOTAL_SIZE, dt, submatrix, SUBMATRIX_TOTAL_SIZE,
         MPI_FLOAT, 0, MPI_COMM_WORLD);
-    /*MPI_Scatter(matrix, SUBMATRIX_TOTAL_SIZE, MPI_FLOAT, submatrix, SUBMATRIX_TOTAL_SIZE,
-        MPI_FLOAT, 0, MPI_COMM_WORLD);*/
+    //MPI_Scatter(matrix, SUBMATRIX_TOTAL_SIZE, MPI_FLOAT, submatrix, SUBMATRIX_TOTAL_SIZE,
+      //  MPI_FLOAT, 0, MPI_COMM_WORLD);
 }
 
 //void scatter(float matrix[][8], int SIZE, float submatrix[][8]) {

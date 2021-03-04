@@ -42,6 +42,9 @@ int main() {
 
     init();
     load(init_matrices);
+    int arr[] = {1, 2, 3, 4};
+    int brr[2];
+    //scatter(arr, 4, brr);
     scatter(matrix1, MATRIX_SIZE * MATRIX_SIZE, submatrix);
     /*for(int i=0;i<4;i++)
         for(int j=0;j<8;j++)
