@@ -129,6 +129,17 @@ int farm(int NUM_THREADS, int input_len, R(*worker)(Args...), AArgs... args) {
 }
 
 // MPI code
+
+// Function from https://stackoverflow.com/questions/42490331/generic-mpi-code
+template <typename T>
+MPI_Datatype resolveType();
+
+template <>
+MPI_Datatype resolveType<float>()
+{
+    return MPI_FLOAT;
+}
+
 void init() {
     MPI_Init(NULL, NULL);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
@@ -150,8 +161,10 @@ void scatter(T (&matrix)[size], int SIZE, T (&submatrix)[size2]) {
     const int SUBMATRIX_TOTAL_SIZE = SIZE / numtasks;
 
     // Scattering matrix1 to all nodes in chunks
-    MPI_Scatter(matrix, SUBMATRIX_TOTAL_SIZE, MPI_FLOAT, submatrix, SUBMATRIX_TOTAL_SIZE,
+    MPI_Scatter(matrix, SUBMATRIX_TOTAL_SIZE, resolveType<T>, submatrix, SUBMATRIX_TOTAL_SIZE,
         MPI_FLOAT, 0, MPI_COMM_WORLD);
+    /*MPI_Scatter(matrix, SUBMATRIX_TOTAL_SIZE, MPI_FLOAT, submatrix, SUBMATRIX_TOTAL_SIZE,
+        MPI_FLOAT, 0, MPI_COMM_WORLD);*/
 }
 
 //void scatter(float matrix[][8], int SIZE, float submatrix[][8]) {
