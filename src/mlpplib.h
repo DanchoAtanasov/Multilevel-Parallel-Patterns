@@ -10,20 +10,23 @@
 #include <stdlib.h>
 #include <type_traits>
 
-const int MAX_THREADS = 16;
+const int kMaxThreads = 16;
 
 // MPI variables
-int numtasks, rank, sendcount, recvcount, source;
+int numTasks;  // Number of MPI processes - nodes running the MPI task
+int rank;
+const int kSource = 0;  // Task 0 is the main task
 
+// MPI variables for the non-blocking message used in the Gather routine
 MPI_Request reqs[1];
 MPI_Status stats[1];
 
 // pthread code
 template<typename R, typename... Args, typename... AArgs>
-int farm(int NUM_THREADS, int input_len, R(*worker)(Args...), AArgs... args);
+int Farm(int num_threads, int input_len, R(*worker)(Args...), AArgs... args);
 
 template<typename R, typename... Args>
-struct thread_data {
+struct ThreadData {
     int thread_id;
     R(*worker)(Args...);
     std::tuple<Args...> args;
@@ -48,11 +51,11 @@ struct thread_data {
 
 // Implementations
 
-// worker_wrapper function that is called on separate threads
-// Calls the provided worker function with the processeed arguments 
+// WorkerWrapper function that is called on separate threads,
+// calls the provided worker function with the processeed arguments
 template<typename R, typename... Args>
-void* worker_wrapper(void* threadarg) {
-    thread_data<R, Args...>* my_data = (thread_data<R, Args...>*) threadarg;
+void* WorkerWrapper(void* threadarg) {
+    ThreadData<R, Args...>* my_data = (ThreadData<R, Args...>*) threadarg;
     int tid = my_data->thread_id;
     printf("rank %d -> Working thread: %d\n", rank, tid);
 
@@ -64,59 +67,56 @@ void* worker_wrapper(void* threadarg) {
 
 // Farm function that calls 'worker' function on 'input_array' with length 'input_len'
 template<typename R, typename... Args, typename... AArgs>
-int farm(int NUM_THREADS, int input_len, R(*worker)(Args...), AArgs... args) {
-    printf("rank %d -> In farm with num args: %d\n", rank, sizeof...(AArgs));
-    //printf("NUM_THREADS: %d, input_len: %d\n", NUM_THREADS, input_len);
+int Farm(int num_threads, int input_len, R(*worker)(Args...), AArgs... args) {
+    printf("rank %d -> In Farm with num args: %d\n", rank, sizeof...(AArgs));
+    //printf("num_threads: %d, input_len: %d\n", num_threads, input_len);
 
     //int * result = (int*)malloc(input_len * sizeof(int));
     //free(result)
 
-    // If there are more threads requested than the array_lenght reduce threads
-    if (NUM_THREADS > input_len) NUM_THREADS = input_len; //TODO if input_len % numtasks != 0
+    if (num_threads > kMaxThreads) num_threads = kMaxThreads;
 
-    printf("rank %d -> NUM_THREADS: %d\n", rank, NUM_THREADS);
+    // If there are more threads requested than the array_lenght reduce threads
+    if (num_threads > input_len) num_threads = input_len; //TODO if input_len % numTasks != 0
+    //printf("rank %d -> num_threads: %d\n", rank, num_threads);
 
     // Initialize array of threads 
-    pthread_t threads[NUM_THREADS];
+    pthread_t threads[num_threads];
 
     // Initialize thread_data_array 
-    thread_data<R, Args...> thread_data_array[NUM_THREADS];
+    ThreadData<R, Args...> thread_data_array[num_threads];
 
     // Initialize and set thread detached attribute
     pthread_attr_t attr;
     pthread_attr_init(&attr);
     pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
 
-    int rc;
-    int batch_size = (input_len / numtasks) / NUM_THREADS;
-    //int start = rank * batch_size;
-    //int end = (rank + 1) * batch_size;
-    //if (rank == numtasks - 1) end = input_len;
-    //int _batch_size = batch_size / NUM_THREADS;
-    for (int t = 0; t < NUM_THREADS; t++) {
+    int return_code;
+    int batch_size = (input_len / numTasks) / num_threads;
+    for (int t = 0; t < num_threads; t++) {
         int start = t * batch_size;
         int end = (t + 1) * batch_size;
-        //int start = t * batch_size;
-        //int end = start + batch_size;
-        if (t == NUM_THREADS - 1) end = input_len / numtasks + input_len % numtasks; // add remainder
+        if (t == num_threads - 1) end = input_len / numTasks + input_len % numTasks; // add remainder
         printf("rank %d -> new thread with t:%d, start:%d, end:%d\n", rank, t, start, end);
+        
+        // Set values in thread_data_array to be passed to the corresponding threads
         thread_data_array[t].thread_id = t;
         thread_data_array[t].worker = worker;
         thread_data_array[t].args = std::tuple<Args...>(start, end, args...);
 
-        rc = pthread_create(&threads[t], &attr, worker_wrapper<R, Args...>, (void*)&thread_data_array[t]);
-        if (rc) {
-            printf("ERROR; return code from pthread_create() is %d\n", rc);
+        return_code = pthread_create(&threads[t], &attr, WorkerWrapper<R, Args...>, (void*)&thread_data_array[t]);
+        if (return_code) {
+            printf("ERROR; return code from pthread_create() is %d\n", return_code);
             exit(-1);
         }
     }
 
     pthread_attr_destroy(&attr);
 
-    for (int t = 0; t < NUM_THREADS; t++) {
-        rc = pthread_join(threads[t], NULL);
-        if (rc) {
-            printf("ERROR; return code from pthread_join() is %d\n", rc);
+    for (int t = 0; t < num_threads; t++) {
+        return_code = pthread_join(threads[t], NULL);
+        if (return_code) {
+            printf("ERROR; return code from pthread_join() is %d\n", return_code);
             exit(-1);
         }
         printf("rank %d -> Completed join with thread %ld\n", rank, t);
@@ -130,77 +130,93 @@ int farm(int NUM_THREADS, int input_len, R(*worker)(Args...), AArgs... args) {
 
 // MPI code
 
-// Function from https://stackoverflow.com/questions/42490331/generic-mpi-code
+// Templated function to return the MPI datatype
+// Code adapted from: https://stackoverflow.com/questions/42490331/generic-mpi-code
 template <typename T>
-MPI_Datatype resolveType();
+MPI_Datatype ResolveType();
 
 template <>
-MPI_Datatype resolveType<float>()
+MPI_Datatype ResolveType<float>()
 {
     return MPI_FLOAT;
 }
 
 template <>
-MPI_Datatype resolveType<int>()
+MPI_Datatype ResolveType<int>()
 {
     return MPI_INT;
 }
 
-void init() {
-    MPI_Init(NULL, NULL);
-    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-    MPI_Comm_size(MPI_COMM_WORLD, &numtasks);
+template <>
+MPI_Datatype ResolveType<double>()
+{
+    return MPI_DOUBLE;
 }
 
-void load(void(*func)()) {
+template <>
+MPI_Datatype ResolveType<char>()
+{
+    return MPI_CHAR;
+}
+
+template <>
+MPI_Datatype ResolveType<long>()
+{
+    return MPI_LONG;
+}
+
+template <>
+MPI_Datatype ResolveType<short>()
+{
+    return MPI_SHORT;
+}
+
+void Init() {
+    MPI_Init(NULL, NULL);
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    MPI_Comm_size(MPI_COMM_WORLD, &numTasks);
+}
+
+void Load(void(*func)()) {
     if (rank == 0) {
         printf("rank %d -> In load\n", rank);
         (*func)();
     }
 }
 
-template <typename T, size_t size, size_t size2>
-void scatter(T (&matrix)[size], int SIZE, T (&submatrix)[size2]) {
-    printf("rank %d -> In scatter\n", rank);
-    if (std::is_same<T, float[size]>::value) { printf("DANCHO E GOTING PICHAGA\n"); }
-    else printf("DANCHO e lame \n");
-    const int SUBMATRIX_TOTAL_SIZE = SIZE / numtasks;
+template <typename T, size_t send_size, size_t receive_size>
+void Scatter(T (&send_buffer)[send_size], int count, T (&receive_buffer)[receive_size]) {
+    printf("rank %d -> In Scatter\n", rank);
+    const int kChunkSize = count / numTasks;
 
-    //T dancho;
-    MPI_Datatype dt = resolveType<typename std::remove_all_extents<T>::type>();
+    MPI_Datatype data_type = ResolveType<typename std::remove_all_extents<T>::type>();
 
     // Scattering matrix1 to all nodes in chunks
-    MPI_Scatter(matrix, SUBMATRIX_TOTAL_SIZE, dt, submatrix, SUBMATRIX_TOTAL_SIZE,
-        MPI_FLOAT, 0, MPI_COMM_WORLD);
-    //MPI_Scatter(matrix, SUBMATRIX_TOTAL_SIZE, MPI_FLOAT, submatrix, SUBMATRIX_TOTAL_SIZE,
-      //  MPI_FLOAT, 0, MPI_COMM_WORLD);
+    MPI_Scatter(send_buffer, kChunkSize, data_type, receive_buffer, kChunkSize,
+        data_type, kSource, MPI_COMM_WORLD);
 }
 
-//void scatter(float matrix[][8], int SIZE, float submatrix[][8]) {
-//    printf("rank %d -> In scatter\n", rank);
-//    const int SUBMATRIX_TOTAL_SIZE = SIZE / numtasks;
-//
-//    // Scattering matrix1 to all nodes in chunks
-//    MPI_Scatter(matrix, SUBMATRIX_TOTAL_SIZE, MPI_FLOAT, submatrix, SUBMATRIX_TOTAL_SIZE,
-//        MPI_FLOAT, 0, MPI_COMM_WORLD);
-//}
+template <typename T, size_t send_size>
+void Broadcast(T(&send_buffer)[send_size], int count) {
+    printf("rank %d -> In Broadcast\n", rank);
 
-template <typename T, size_t size>
-void broadcast(T(&matrix)[size], int SIZE) {
-    printf("rank %d -> In broadcast\n", rank);
+    MPI_Datatype data_type = ResolveType<typename std::remove_all_extents<T>::type>();
+
     // Broadcasting the whole matrix2 to all nodes
-    MPI_Bcast(matrix, SIZE, MPI_FLOAT,
-        0, MPI_COMM_WORLD);
+    MPI_Bcast(send_buffer, count, data_type, kSource, MPI_COMM_WORLD);
 }
 
-template <typename T, size_t size, size_t size2>
-void gather(T (&result_matrix)[size], int SIZE, T (&matrix)[size2]) {
-    printf("rank %d -> In gather\n", rank);
-    const int SUBMATRIX_TOTAL_SIZE = SIZE / numtasks;
+template <typename T, size_t send_size, size_t receive_size>
+void Gather(T (&send_buffer)[send_size], int count, T (&receive_buffer)[receive_size]) {
+    printf("rank %d -> In Gather\n", rank);
+    const int kChunkSize = count / numTasks;
+
+    MPI_Datatype data_type = ResolveType<typename std::remove_all_extents<T>::type>();
+
 
     // Gather results from all nodes to main node
-    MPI_Igather(result_matrix, SUBMATRIX_TOTAL_SIZE, MPI_FLOAT, matrix, SUBMATRIX_TOTAL_SIZE,
-        MPI_FLOAT, source, MPI_COMM_WORLD, &reqs[0]);
+    MPI_Igather(send_buffer, kChunkSize, data_type, receive_buffer, kChunkSize,
+        data_type, kSource, MPI_COMM_WORLD, &reqs[0]);
 
     if (rank == 0) {
         MPI_Wait(&reqs[0], &stats[0]);
@@ -208,7 +224,7 @@ void gather(T (&result_matrix)[size], int SIZE, T (&matrix)[size2]) {
     }
 }
 
-void finish() {
+void Finish() {
     printf("rank %d -> Finished exectuion.\n", rank);
     MPI_Finalize();
     
@@ -219,4 +235,4 @@ void finish() {
 
 }
 
-#endif
+#endif  // _MLPPLIB_H_

@@ -40,19 +40,16 @@ void init_matrices() {
 int main() {
     printf("Beginning of main\n");
 
-    init();
-    load(init_matrices);
-    int arr[] = {1, 2, 3, 4};
-    int brr[2];
-    //scatter(arr, 4, brr);
-    scatter(matrix1, MATRIX_SIZE * MATRIX_SIZE, submatrix);
+    Init();
+    Load(init_matrices);
+    Scatter(matrix1, MATRIX_SIZE * MATRIX_SIZE, submatrix);
     /*for(int i=0;i<4;i++)
         for(int j=0;j<8;j++)
             printf("sm[%d][%d]:%.2f\n", i, j, submatrix[i][j]);*/
-    broadcast(matrix2, MATRIX_SIZE * MATRIX_SIZE);
-    int res = farm(3, MATRIX_SIZE, matrixmult, 35.50);
-    gather(result, MATRIX_SIZE * MATRIX_SIZE, matrix3);
-    finish();
+    Broadcast(matrix2, MATRIX_SIZE * MATRIX_SIZE);
+    int res = Farm(3, MATRIX_SIZE, matrixmult, 35.50);
+    Gather(result, MATRIX_SIZE * MATRIX_SIZE, matrix3);
+    Finish();
 
     printf("First and last values in the matrix are: %.0f, %.0f\n", matrix3[0][0], matrix3[MATRIX_SIZE - 1][MATRIX_SIZE - 1]);
     for (int i = 0; i < MATRIX_SIZE; i++) {
