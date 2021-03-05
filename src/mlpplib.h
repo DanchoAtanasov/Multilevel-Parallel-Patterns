@@ -21,10 +21,22 @@ const int kSource = 0;  // Task 0 is the main task
 MPI_Request reqs[1];
 MPI_Status stats[1];
 
-// pthread code
+// pthread prototypes
 template<typename R, typename... Args, typename... AArgs>
 int Farm(int num_threads, int input_len, R(*worker)(Args...), AArgs... args);
 
+// MPI prototypes
+void Init();
+void Load(void(*func)());
+template <typename T, size_t send_size, size_t receive_size>
+void Scatter(T(&send_buffer)[send_size], int count, T(&receive_buffer)[receive_size]);
+template <typename T, size_t send_size>
+void Broadcast(T(&send_buffer)[send_size], int count);
+template <typename T, size_t send_size, size_t receive_size>
+void Gather(T(&send_buffer)[send_size], int count, T(&receive_buffer)[receive_size]);
+void Finish();
+
+// pthread implementations
 template<typename R, typename... Args>
 struct ThreadData {
     int thread_id;
@@ -48,8 +60,6 @@ struct ThreadData {
         return func(args);
     }
 };
-
-// Implementations
 
 // WorkerWrapper function that is called on separate threads,
 // calls the provided worker function with the processeed arguments
@@ -128,7 +138,7 @@ int Farm(int num_threads, int input_len, R(*worker)(Args...), AArgs... args) {
     return 1;  // TODO Change the return type
 }
 
-// MPI code
+// MPI implementations
 
 // Templated function to return the MPI datatype
 // Code adapted from: https://stackoverflow.com/questions/42490331/generic-mpi-code
