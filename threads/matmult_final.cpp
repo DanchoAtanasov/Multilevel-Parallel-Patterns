@@ -2,7 +2,7 @@
 #include "../src/mlpplib.h"
 
 const int MATRIX_SIZE = 8;
-const int NODES = 2;
+const int NODES = 4;
 
 float matrix1[MATRIX_SIZE][MATRIX_SIZE];
 float matrix2[MATRIX_SIZE][MATRIX_SIZE];
@@ -47,7 +47,7 @@ int main() {
         for(int j=0;j<8;j++)
             printf("sm[%d][%d]:%.2f\n", i, j, submatrix[i][j]);*/
     Broadcast(matrix2, MATRIX_SIZE * MATRIX_SIZE);
-    int res = Farm(3, MATRIX_SIZE, matrixmult, 35.50);
+    int res = Farm(1, MATRIX_SIZE, matrixmult, 35.50);
     Gather(result, MATRIX_SIZE * MATRIX_SIZE, matrix3);
     Finish();
 
