@@ -186,7 +186,7 @@ void MakeCustomDatatype() {
     printf("rank %d -> In MakeCustomDatatype\n", rank);
 
     // This needs work to be adaptable for all kinds of structs
-    MPI_Datatype MPI_OptionData;
+    /*MPI_Datatype MPI_OptionData;
     MPI_Datatype type[9] = { MPI_FLOAT, MPI_FLOAT, MPI_FLOAT, MPI_FLOAT, MPI_FLOAT, MPI_FLOAT,
         MPI_CHAR,  MPI_FLOAT,  MPI_FLOAT };
     int blocklen[9] = { 1, 1, 1, 1, 1, 1, 1, 1, 1 };
@@ -194,7 +194,7 @@ void MakeCustomDatatype() {
         offsetof(OptionData, divq),  offsetof(OptionData, v),  offsetof(OptionData, t),
         offsetof(OptionData, OptionType),  offsetof(OptionData, divs),  offsetof(OptionData, DGrefval), };
     MPI_Type_create_struct(9, blocklen, disp, type, &MPI_OptionData);
-    MPI_Type_commit(&MPI_OptionData);
+    MPI_Type_commit(&MPI_OptionData);*/
 
 }
 
