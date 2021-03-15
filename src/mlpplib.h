@@ -145,7 +145,7 @@ int Farm(int num_threads, int input_len, R(*worker)(Args...), AArgs... args) {
 // Code adapted from: https://stackoverflow.com/questions/42490331/generic-mpi-code
 template <typename T>
 MPI_Datatype ResolveType() {
-    print("Default\n");
+    printf("Default\n");
     return MPI_Custom;
 }
 
@@ -158,7 +158,7 @@ MPI_Datatype ResolveType<float>()
 template <>
 MPI_Datatype ResolveType<int>()
 {
-    print("In int\n");
+    printf("In int\n");
     return MPI_INT;
 }
 
