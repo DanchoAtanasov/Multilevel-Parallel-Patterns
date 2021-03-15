@@ -182,8 +182,12 @@ MPI_Datatype ResolveType<short>()
 }
 
 template <typename T>
-void MakeCustomDatatype() {
+void MakeCustomDatatype(T arg) {
     printf("rank %d -> In MakeCustomDatatype\n", rank);
+
+    T dancho = T();
+    dancho.a = 5;
+    dancho.b = 4.2f;
 
     // This needs work to be adaptable for all kinds of structs
     /*MPI_Datatype MPI_OptionData;
