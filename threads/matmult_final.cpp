@@ -43,13 +43,24 @@ void init_matrices() {
         }
 }
 
+void init_d() {
+    printf("Init d\n");
+    d[0].a = 1;
+    d[0].b = 1.0f;
+    d[1].a = 2;
+    d[1].b = 2.0f;
+}
+
 int main() {
     printf("Beginning of main\n");
 
     Init();
     
+    Load(init_d);
+    printf("%d %.2f %d %.2f\n", d[0].a, d[0].b, d[1].a, d[1].b);
     Broadcast(d, 2);
-    //MakeCustomDatatype<my_struct>();
+    printf("%d %.2f %d %.2f\n", d[0].a, d[0].b, d[1].a, d[1].b);
+    
     //Load(init_matrices);
     //Scatter(matrix1, MATRIX_SIZE * MATRIX_SIZE, submatrix);
     /*for(int i=0;i<4;i++)
