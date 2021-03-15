@@ -46,7 +46,7 @@ int main() {
 
     Init();
     my_struct d;
-    MakeCustomDatatype(d);
+    MakeCustomDatatype<my_struct>();
     //Load(init_matrices);
     //Scatter(matrix1, MATRIX_SIZE * MATRIX_SIZE, submatrix);
     /*for(int i=0;i<4;i++)
