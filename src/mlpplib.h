@@ -145,7 +145,13 @@ int Farm(int num_threads, int input_len, R(*worker)(Args...), AArgs... args) {
 // Code adapted from: https://stackoverflow.com/questions/42490331/generic-mpi-code
 template <typename T>
 MPI_Datatype ResolveType() {
-    printf("Default\n");
+    printf("rank %d -> In default ResolveType, creating new datatype\n", rank);
+    MPI_Datatype type[2] = { MPI_INT, MPI_FLOAT };
+    int blocklen[2] = { 1, 1 };
+    MPI_Aint disp[2] = { offsetof(T, a), offsetof(T, b) };
+    MPI_Type_create_struct(2, blocklen, disp, type, &MPI_Custom);
+    MPI_Type_commit(&MPI_Custom);
+
     return MPI_Custom;
 }
 
@@ -158,7 +164,6 @@ MPI_Datatype ResolveType<float>()
 template <>
 MPI_Datatype ResolveType<int>()
 {
-    printf("In int\n");
     return MPI_INT;
 }
 

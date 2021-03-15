@@ -16,6 +16,8 @@ typedef struct my_struct_ {
     float b;
 } my_struct;
 
+my_struct d[2];
+
 int matrixmult(int start, int end, double additionalOption) {
     printf("In matrixmult with %d %d\n", start, end);
     printf("additionalOption: %.2f\n", additionalOption);
@@ -45,8 +47,9 @@ int main() {
     printf("Beginning of main\n");
 
     Init();
-    my_struct d;
-    MakeCustomDatatype<my_struct>();
+    
+    Broadcast(d, 2);
+    //MakeCustomDatatype<my_struct>();
     //Load(init_matrices);
     //Scatter(matrix1, MATRIX_SIZE * MATRIX_SIZE, submatrix);
     /*for(int i=0;i<4;i++)
