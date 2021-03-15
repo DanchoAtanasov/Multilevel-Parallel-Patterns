@@ -189,6 +189,13 @@ void MakeCustomDatatype(T arg) {
     dancho.a = 5;
     dancho.b = 4.2f;
 
+    MPI_Datatype MPI_T;
+    MPI_Datatype type[2] = { MPI_INT, MPI_FLOAT };
+    int blocklen[2] = { 1, 1 };
+    MPI_Aint disp[2] = { offsetof(T, a), offsetof(T, b) };
+    MPI_Type_create_struct(2, blocklen, disp, type, &MPI_T);
+    MPI_Type_commit(&MPI_T);
+
     // This needs work to be adaptable for all kinds of structs
     /*MPI_Datatype MPI_OptionData;
     MPI_Datatype type[9] = { MPI_FLOAT, MPI_FLOAT, MPI_FLOAT, MPI_FLOAT, MPI_FLOAT, MPI_FLOAT,
