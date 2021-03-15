@@ -144,7 +144,10 @@ int Farm(int num_threads, int input_len, R(*worker)(Args...), AArgs... args) {
 // Templated function to return the MPI datatype
 // Code adapted from: https://stackoverflow.com/questions/42490331/generic-mpi-code
 template <typename T>
-MPI_Datatype ResolveType();
+MPI_Datatype ResolveType() {
+    print("Default\n");
+    return MPI_Custom;
+}
 
 template <>
 MPI_Datatype ResolveType<float>()
@@ -155,6 +158,7 @@ MPI_Datatype ResolveType<float>()
 template <>
 MPI_Datatype ResolveType<int>()
 {
+    print("In int\n");
     return MPI_INT;
 }
 
@@ -191,6 +195,11 @@ void MakeCustomDatatype() {
     //dancho.b = 4.2f;
 
     //MPI_Datatype MPI_T;
+    MPI_Datatype a = ResolveType<typename std::remove_all_extents<int>::type>();
+    MPI_Datatype b = ResolveType<typename std::remove_all_extents<T>::type>();
+    
+    
+    
     MPI_Datatype type[2] = { MPI_INT, MPI_FLOAT };
     int blocklen[2] = { 1, 1 };
     MPI_Aint disp[2] = { offsetof(T, a), offsetof(T, b) };
