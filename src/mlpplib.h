@@ -16,6 +16,7 @@ const int kMaxThreads = 16;
 int numTasks;  // Number of MPI processes - nodes running the MPI task
 int rank;
 const int kSource = 0;  // Task 0 is the main task
+MPI_Datatype MPI_Custom;
 
 // MPI variables for the non-blocking message used in the Gather routine
 MPI_Request reqs[1];
@@ -182,19 +183,19 @@ MPI_Datatype ResolveType<short>()
 }
 
 template <typename T>
-void MakeCustomDatatype(T arg) {
+void MakeCustomDatatype() {
     printf("rank %d -> In MakeCustomDatatype\n", rank);
 
-    T dancho = T();
-    dancho.a = 5;
-    dancho.b = 4.2f;
+    //T dancho = T();
+    //dancho.a = 5;
+    //dancho.b = 4.2f;
 
-    MPI_Datatype MPI_T;
+    //MPI_Datatype MPI_T;
     MPI_Datatype type[2] = { MPI_INT, MPI_FLOAT };
     int blocklen[2] = { 1, 1 };
     MPI_Aint disp[2] = { offsetof(T, a), offsetof(T, b) };
-    MPI_Type_create_struct(2, blocklen, disp, type, &MPI_T);
-    MPI_Type_commit(&MPI_T);
+    MPI_Type_create_struct(2, blocklen, disp, type, &MPI_Custom);
+    MPI_Type_commit(&MPI_Custom);
 
     // This needs work to be adaptable for all kinds of structs
     /*MPI_Datatype MPI_OptionData;
