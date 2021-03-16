@@ -151,8 +151,8 @@ decltype(auto) access(C& cls, T C::* member, Mems... rest) {
     return access((cls.*member), rest...);
 }
 
-template <typename... Members>
-void doSomething(A* a, Members... mems) {
+template <typename T, typename... Members>
+void doSomething(T* a, Members... mems) {
     //access(*a, mems...) = 5;
     printf("rank %d -> In do sth: %d\n", access(*a, mems...));
 }
