@@ -16,7 +16,6 @@ const int kMaxThreads = 16;
 int numTasks;  // Number of MPI processes - nodes running the MPI task
 int rank;
 const int kSource = 0;  // Task 0 is the main task
-MPI_Datatype MPI_Custom;
 
 // MPI variables for the non-blocking message used in the Gather routine
 MPI_Request reqs[1];
@@ -141,12 +140,31 @@ int Farm(int num_threads, int input_len, R(*worker)(Args...), AArgs... args) {
 
 // MPI implementations
 
+// Testing accessing class members function
+template <typename C, typename T>
+decltype(auto) access(C& cls, T C::* member) {
+    return (cls.*member);
+}
+
+template <typename C, typename T, typename... Mems>
+decltype(auto) access(C& cls, T C::* member, Mems... rest) {
+    return access((cls.*member), rest...);
+}
+
+template <typename... Members>
+void doSomething(A* a, Members... mems) {
+    //access(*a, mems...) = 5;
+    printf("rank %d -> In do sth: %d\n", access(*a, mems...));
+}
+
 // Templated function to return the MPI datatype
 // Code adapted from: https://stackoverflow.com/questions/42490331/generic-mpi-code
 template <typename T>
 MPI_Datatype ResolveType() {
     printf("rank %d -> In default ResolveType, creating new datatype\n", rank);
-    MPI_Datatype type[2] = { MPI_INT, MPI_FLOAT };
+
+    MPI_Datatype MPI_Custom;
+    MPI_Datatype type[2] = { MPI_INT, MPI_INT };
     int blocklen[2] = { 1, 1 };
     MPI_Aint disp[2] = { offsetof(T, a), offsetof(T, b) };
     MPI_Type_create_struct(2, blocklen, disp, type, &MPI_Custom);

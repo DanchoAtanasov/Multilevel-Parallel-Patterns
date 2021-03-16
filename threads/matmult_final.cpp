@@ -13,7 +13,7 @@ float result[MATRIX_SIZE/NODES][MATRIX_SIZE];
 
 typedef struct my_struct_ {
     int a;
-    float b;
+    int b;
 } my_struct;
 
 my_struct d[2];
@@ -46,9 +46,9 @@ void init_matrices() {
 void init_d() {
     printf("Init d\n");
     d[0].a = 1;
-    d[0].b = 1.0f;
+    d[0].b = 1;
     d[1].a = 2;
-    d[1].b = 2.0f;
+    d[1].b = 2;
 }
 
 int main() {
@@ -57,9 +57,10 @@ int main() {
     Init();
     
     Load(init_d);
-    printf("%d %.2f %d %.2f\n", d[0].a, d[0].b, d[1].a, d[1].b);
+    printf("%d %d %d %d\n", d[0].a, d[0].b, d[1].a, d[1].b);
+    doSomething(&d[0], &my_struct::a, &my_struct::b);
     Broadcast(d, 2);
-    printf("%d %.2f %d %.2f\n", d[0].a, d[0].b, d[1].a, d[1].b);
+    printf("%d %d %d %d\n", d[0].a, d[0].b, d[1].a, d[1].b);
     
     //Load(init_matrices);
     //Scatter(matrix1, MATRIX_SIZE * MATRIX_SIZE, submatrix);
