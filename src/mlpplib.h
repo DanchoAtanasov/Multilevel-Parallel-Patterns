@@ -143,21 +143,23 @@ int Farm(int num_threads, int input_len, R(*worker)(Args...), AArgs... args) {
 
 // Testing accessing class members function
 template <typename C, typename T>
-decltype(auto) access(C& cls, T C::* member) {
-    printf("rank %d -> In smallest access\n", rank);
-    return (cls.*member);
+void access(C& cls, T C::* member) {
+    printf("rank %d -> In smallest access, member: %d\n", rank, cls.*member);
+    //return (cls.*member);
 }
 
 template <typename C, typename T, typename... Mems>
-decltype(auto) access(C& cls, T C::* member, Mems... rest) {
+void access(C& cls, T C::* member, Mems... rest) {
     printf("rank %d -> In bigger access, sizeof rest:%d\n", rank, sizeof...(Mems));
-    return access((cls), rest...);
+    access(cls, member);
+    if (sizeof...(Mems) > 0) access(cls, rest...);
+    //return access((cls), rest...);
 }
 
 template <typename T, typename... Members>
 void doSomething(T* a, Members... mems) {
     printf("rank %d -> In do sth\n", rank);
-    access(*a, mems...) += 1;
+    access(*a, mems...);
 }
 
 // Templated function to return the MPI datatype
