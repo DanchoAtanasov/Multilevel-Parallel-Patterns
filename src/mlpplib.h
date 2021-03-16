@@ -146,30 +146,6 @@ int Farm(int num_threads, int input_len, R(*worker)(Args...), AArgs... args) {
 
 // MPI implementations
 
-// Testing accessing class members function
-template <typename C, typename T>
-void access(C& cls, T C::* member) {
-    printf("rank %d -> In smallest access, member: %d\n", rank, cls.*member);
-    _type.push_back(ResolveType<typename std::remove_all_extents<T>::type>());
-    _blocklen.push_back(1);
-    _disp.push_back(offsetof(C, member));
-    //return (cls.*member);
-}
-
-template <typename C, typename T, typename... Mems>
-void access(C& cls, T C::* member, Mems... rest) {
-    printf("rank %d -> In bigger access, sizeof rest:%d\n", rank, sizeof...(Mems));
-    access(cls, member);
-    if (sizeof...(Mems) > 0) access(cls, rest...);
-    //return access((cls), rest...);
-}
-
-template <typename T, typename... Members>
-void doSomething(T* a, Members... mems) {
-    printf("rank %d -> In do sth\n", rank);
-    access(*a, mems...);
-}
-
 // Templated function to return the MPI datatype
 // Code adapted from: https://stackoverflow.com/questions/42490331/generic-mpi-code
 template <typename T>
@@ -258,6 +234,30 @@ void MakeCustomDatatype() {
     MPI_Type_create_struct(9, blocklen, disp, type, &MPI_OptionData);
     MPI_Type_commit(&MPI_OptionData);*/
 
+}
+
+// Testing accessing class members function
+template <typename C, typename T>
+void access(C& cls, T C::* member) {
+    printf("rank %d -> In smallest access, member: %d\n", rank, cls.*member);
+    _type.push_back(ResolveType<typename std::remove_all_extents<T>::type>());
+    _blocklen.push_back(1);
+    _disp.push_back(offsetof(C, member));
+    //return (cls.*member);
+}
+
+template <typename C, typename T, typename... Mems>
+void access(C& cls, T C::* member, Mems... rest) {
+    printf("rank %d -> In bigger access, sizeof rest:%d\n", rank, sizeof...(Mems));
+    access(cls, member);
+    if (sizeof...(Mems) > 0) access(cls, rest...);
+    //return access((cls), rest...);
+}
+
+template <typename T, typename... Members>
+void doSomething(T* a, Members... mems) {
+    printf("rank %d -> In do sth\n", rank);
+    access(*a, mems...);
 }
 
 void Init() {
