@@ -170,9 +170,10 @@ MPI_Datatype ResolveType() {
     printf("rank %d -> In default ResolveType, creating new datatype\n", rank);
 
     //MPI_Datatype type[2] = { MPI_INT, MPI_INT };
-    std::vector<MPI_Datatype> type;
-    type.push_back(MPI_INT);
-    type.push_back(MPI_INT);
+    std::vector<MPI_Datatype> _type;
+    _type.push_back(MPI_INT);
+    _type.push_back(MPI_INT);
+    MPI_Datatype * type = &_type[0];
     int blocklen[2] = { 1, 1 };
     MPI_Aint disp[2] = { offsetof(T, a), offsetof(T, b) };
     MPI_Type_create_struct(2, blocklen, disp, type, &MPI_Custom);
