@@ -18,6 +18,13 @@ typedef struct my_struct_ {
 
 my_struct d[2];
 
+struct A {
+    int x;
+    int y;
+};
+
+A myA;
+
 int matrixmult(int start, int end, double additionalOption) {
     printf("In matrixmult with %d %d\n", start, end);
     printf("additionalOption: %.2f\n", additionalOption);
@@ -58,7 +65,7 @@ int main() {
     
     Load(init_d);
     printf("%d %d %d %d\n", d[0].a, d[0].b, d[1].a, d[1].b);
-    doSomething(&d[0], &my_struct::a, &my_struct::b);
+    doSomething(&myA, &A::x, &A::y);
     Broadcast(d, 2);
     printf("%d %d %d %d\n", d[0].a, d[0].b, d[1].a, d[1].b);
     
