@@ -65,7 +65,10 @@ int main() {
     
     Load(init_d);
     printf("%d %d %d %d\n", d[0].a, d[0].b, d[1].a, d[1].b);
+    myA.x = 5;
+    myA.y = 7;
     doSomething(&myA, &A::x, &A::y);
+    printf("after doSomething: %d, %d\n", myA.x, myA.y);
     Broadcast(d, 2);
     printf("%d %d %d %d\n", d[0].a, d[0].b, d[1].a, d[1].b);
     

@@ -149,13 +149,13 @@ decltype(auto) access(C& cls, T C::* member) {
 
 template <typename C, typename T, typename... Mems>
 decltype(auto) access(C& cls, T C::* member, Mems... rest) {
-    return access((cls.*member), rest...);
+    return access((cls), rest...);
 }
 
 template <typename T, typename... Members>
 void doSomething(T* a, Members... mems) {
-    //access(*a, mems...) = 5;
-    printf("rank %d -> In do sth: %d\n", access(*a, mems...));
+    access(*a, mems...) += 1 ;
+    printf("rank %d -> In do sth:\n", rank);
 }
 
 // Templated function to return the MPI datatype
