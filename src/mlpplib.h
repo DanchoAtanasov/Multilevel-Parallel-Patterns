@@ -16,6 +16,7 @@ const int kMaxThreads = 16;
 int numTasks;  // Number of MPI processes - nodes running the MPI task
 int rank;
 const int kSource = 0;  // Task 0 is the main task
+MPI_Datatype MPI_Custom;
 
 // MPI variables for the non-blocking message used in the Gather routine
 MPI_Request reqs[1];
@@ -163,7 +164,6 @@ template <typename T>
 MPI_Datatype ResolveType() {
     printf("rank %d -> In default ResolveType, creating new datatype\n", rank);
 
-    MPI_Datatype MPI_Custom;
     MPI_Datatype type[2] = { MPI_INT, MPI_INT };
     int blocklen[2] = { 1, 1 };
     MPI_Aint disp[2] = { offsetof(T, a), offsetof(T, b) };
