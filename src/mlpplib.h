@@ -17,6 +17,10 @@ const int kMaxThreads = 16;
 int numTasks;  // Number of MPI processes - nodes running the MPI task
 int rank;
 const int kSource = 0;  // Task 0 is the main task
+std::vector<MPI_Datatype> _type;
+std::vector<int> _blocklen;
+std::vector<MPI_Aint> _disp;
+
 MPI_Datatype MPI_Custom;
 
 // MPI variables for the non-blocking message used in the Gather routine
@@ -146,6 +150,9 @@ int Farm(int num_threads, int input_len, R(*worker)(Args...), AArgs... args) {
 template <typename C, typename T>
 void access(C& cls, T C::* member) {
     printf("rank %d -> In smallest access, member: %d\n", rank, cls.*member);
+    _type.push_back(ResolveType<typename std::remove_all_extents<T>::type>());
+    _blocklen.push_back(1);
+    _disp.push_back(offsetof(C, member));
     //return (cls.*member);
 }
 
@@ -170,12 +177,14 @@ MPI_Datatype ResolveType() {
     printf("rank %d -> In default ResolveType, creating new datatype\n", rank);
 
     //MPI_Datatype type[2] = { MPI_INT, MPI_INT };
-    std::vector<MPI_Datatype> _type;
+    /*std::vector<MPI_Datatype> _type;
     _type.push_back(MPI_INT);
-    _type.push_back(MPI_INT);
-    MPI_Datatype * type = &_type[0];
-    int blocklen[2] = { 1, 1 };
-    MPI_Aint disp[2] = { offsetof(T, a), offsetof(T, b) };
+    _type.push_back(MPI_INT);*/
+    MPI_Datatype* type = &_type[0];
+    //int blocklen[2] = { 1, 1 };
+    int* blocklen = &_blocklen[0];
+    //MPI_Aint disp[2] = { offsetof(T, a), offsetof(T, b) };
+    MPI_Aint* disp = &_disp[0];
     MPI_Type_create_struct(2, blocklen, disp, type, &MPI_Custom);
     MPI_Type_commit(&MPI_Custom);
 

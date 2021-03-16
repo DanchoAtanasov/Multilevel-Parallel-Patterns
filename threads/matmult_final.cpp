@@ -66,11 +66,12 @@ int main() {
     
     Load(init_d);
     printf("%d %d %d %d\n", d[0].a, d[0].b, d[1].a, d[1].b);
-    myA.x = 5;
+    /*myA.x = 5;
     myA.y = 7;
     myA.z = 9;
-    doSomething(&myA, &A::x, &A::y, &A::z);
-    printf("after doSomething: %d, %d\n", myA.x, myA.y);
+    doSomething(&myA, &A::x, &A::y, &A::z);*/
+    doSomething(&d, &my_struct::a, &my_struct::b);
+    //printf("after doSomething: %d, %d\n", myA.x, myA.y);
     Broadcast(d, 2);
     printf("%d %d %d %d\n", d[0].a, d[0].b, d[1].a, d[1].b);
     Finish();
