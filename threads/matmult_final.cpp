@@ -71,7 +71,7 @@ int main() {
     myA.z = 9;
     doSomething(&myA, &A::x, &A::y, &A::z);*/
     doSomething(&d[0], &my_struct::a, &my_struct::b);
-    printf("DANCHO: %d\n", offsetOf(&my_struct::a);
+    printf("DANCHO: %d\n", offsetOf(&my_struct::a));
     //printf("after doSomething: %d, %d\n", myA.x, myA.y);
     Broadcast(d, 2);
     printf("%d %d %d %d\n", d[0].a, d[0].b, d[1].a, d[1].b);
