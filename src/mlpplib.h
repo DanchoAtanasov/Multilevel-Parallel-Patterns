@@ -242,7 +242,7 @@ void access(C& cls, T C::* member) {
     printf("rank %d -> In smallest access, member: %d\n", rank, cls.*member);
     _type.push_back(ResolveType<typename std::remove_all_extents<T>::type>());
     _blocklen.push_back(1);
-    _disp.push_back(offsetof(C, member));
+    _disp.push_back(offsetof(C, a));
     //return (cls.*member);
 }
 
