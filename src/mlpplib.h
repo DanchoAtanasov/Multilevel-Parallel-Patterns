@@ -342,6 +342,25 @@ void Gather(T (&send_buffer)[send_size], int count, T (&receive_buffer)[receive_
     }
 }
 
+// Gather for dynamic arrays
+template <typename T>
+void Gather(T* send_buffer, int count, T* receive_buffer) {
+    printf("rank %d -> In Gather\n", rank);
+    const int kChunkSize = count / numTasks;
+
+    MPI_Datatype data_type = ResolveType<typename std::remove_all_extents<T>::type>();
+
+
+    // Gather results from all nodes to main node
+    MPI_Igather(send_buffer, kChunkSize, data_type, receive_buffer, kChunkSize,
+        data_type, kSource, MPI_COMM_WORLD, &reqs[0]);
+
+    if (rank == 0) {
+        MPI_Wait(&reqs[0], &stats[0]);
+        printf("rank %d -> Finished gathering\n", rank);
+    }
+}
+
 void Finish() {
     printf("rank %d -> Finished exectuion.\n", rank);
     MPI_Finalize();
