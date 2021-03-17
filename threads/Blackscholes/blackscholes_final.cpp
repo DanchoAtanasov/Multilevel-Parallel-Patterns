@@ -40,6 +40,10 @@ fptype* prices;
 fptype* final_prices;
 int numOptions;
 
+
+FILE* file;
+int rv;
+
 int* otype;
 fptype* sptprice;
 fptype* strike;
@@ -208,12 +212,6 @@ int bs_thread(int start, int end) {
 void readFile(int argc, char** argv) {
     printf("Beginning of readFile\n");
     
-    FILE* file;
-    fptype* buffer;
-    int* buffer2;
-    int i;
-    int rv;
-    char* outputFile = argv[3];
     
     int loopnum;
 
@@ -275,6 +273,11 @@ void readFile(int argc, char** argv) {
 int main(int argc, char** argv)
 {
 
+    fptype* buffer;
+    int* buffer2;
+    int i;
+    char* outputFile = argv[3];
+    
     readFile(argc, argv);
 
     // Broadcasting numOptions to all nodes
