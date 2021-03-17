@@ -11,7 +11,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include <string.h>
-#include "../src/mlpplib.h"
+#include "../../src/mlpplib.h"
 
 
 //Precision to use for calculations
@@ -205,6 +205,14 @@ int bs_thread(int start, int end) {
 
 void readFile(int argc, char** argv) {
     printf("Beginning of readFile\n");
+    
+    FILE* file;
+    fptype* buffer;
+    int* buffer2;
+    int i;
+    int rv;
+    char* outputFile = argv[3];
+    
     int loopnum;
 
     if (argc != 4)
@@ -286,12 +294,6 @@ int main(int argc, char** argv)
     //MPI_Type_commit(&MPI_OptionData);
 
 
-    FILE* file;
-    fptype* buffer;
-    int* buffer2;
-    int i;
-    int rv;
-    char* outputFile = argv[3];
 
     readFile(argc, argv);
 
