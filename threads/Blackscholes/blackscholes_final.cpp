@@ -202,6 +202,7 @@ int bs_thread(int start, int end) {
                 rate[i], volatility[i], otime[i],
                 otype[i], 0);
             prices[i] = price;
+	    //printf("DANCHO price: %.4f\n", price);
 
         }
     }
@@ -268,6 +269,8 @@ void readFile(int argc, char** argv) {
         exit(1);
     }
 
+    
+    printf("Load done\n");
 }
 
 int main(int argc, char** argv)
@@ -278,7 +281,8 @@ int main(int argc, char** argv)
     int i;
     char* outputFile = argv[3];
     
-    readFile(argc, argv);
+    Init();
+    Load(readFile, argc, argv);
 
     // Broadcasting numOptions to all nodes
     Broadcast(&numOptions);
@@ -306,6 +310,7 @@ int main(int argc, char** argv)
     // Scattering input data to all nodes
     Scatter(filedata, SPLIT, data);
 
+    printf("Scatter done, SPLIT:%d, numOptions:%d\n", SPLIT, numOptions);
 
 #define PAD 256
 #define LINESIZE 64
@@ -327,6 +332,14 @@ int main(int argc, char** argv)
         rate[i] = data[i].r;
         volatility[i] = data[i].v;
         otime[i] = data[i].t;
+        
+	printf("%d, %.2f, %.2f, %.2f, %.2f, %.2f\n",
+	otype[i],
+        sptprice[i],
+        strike[i],
+        rate[i], 
+        volatility[i],
+        otime[i]);
     }
 
     printf("Size of data: %ld\n", SPLIT * (sizeof(OptionData) + sizeof(int)));
@@ -347,7 +360,6 @@ int main(int argc, char** argv)
     Finish();
 
     printf("rank 0 after wait\n");
-    MPI_Wait(&reqs[1], &stats[1]);
     printf("numOptions:%d\n", numOptions);
     for (int i = 0; i < numOptions; i++) {
         printf("%f\n", final_prices[i]);

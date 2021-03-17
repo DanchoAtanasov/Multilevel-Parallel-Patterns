@@ -161,7 +161,7 @@ MPI_Datatype ResolveType() {
     int* blocklen = &_blocklen[0];
     //MPI_Aint disp[2] = { offsetof(T, a), offsetof(T, b) };
     MPI_Aint* disp = &_disp[0];
-    MPI_Type_create_struct(2, blocklen, disp, type, &MPI_Custom);
+    MPI_Type_create_struct(_type.size(), blocklen, disp, type, &MPI_Custom);
     MPI_Type_commit(&MPI_Custom);
 
     return MPI_Custom;
@@ -255,6 +255,7 @@ template <typename C, typename T, typename... Mems>
 void access(C& cls, T C::* member, Mems... rest) {
     printf("rank %d -> In bigger access, sizeof rest:%d\n", rank, sizeof...(Mems));
     access(cls, member);
+    printf("rank %d -> ARE WE HERE???:%d\n", rank, sizeof...(Mems));
     if (sizeof...(Mems) > 0) access(cls, rest...);
     //return access((cls), rest...);
 }
@@ -271,10 +272,11 @@ void Init() {
     MPI_Comm_size(MPI_COMM_WORLD, &numTasks);
 }
 
-void Load(void(*func)()) {
+template<typename R, typename... Args>
+void Load(R (*func)(Args...), Args... args) {
     if (rank == 0) {
         printf("rank %d -> In load\n", rank);
-        (*func)();
+        (*func)(args...);
     }
 }
 
@@ -295,6 +297,7 @@ template <typename T>
 void Scatter(T* send_buffer, int count, T* receive_buffer) {
     printf("rank %d -> In Scatter\n", rank);
     const int kChunkSize = count / numTasks;
+    printf("rank %d -> kChunkSize:%d\n", rank, kChunkSize);
 
     MPI_Datatype data_type = ResolveType<typename std::remove_all_extents<T>::type>();
 

@@ -2,7 +2,7 @@
 #include "../src/mlpplib.h"
 
 const int MATRIX_SIZE = 8;
-const int NODES = 2;
+const int NODES = 1;
 
 float matrix1[MATRIX_SIZE][MATRIX_SIZE];
 float matrix2[MATRIX_SIZE][MATRIX_SIZE];
