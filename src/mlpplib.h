@@ -290,6 +290,19 @@ void Scatter(T (&send_buffer)[send_size], int count, T (&receive_buffer)[receive
         data_type, kSource, MPI_COMM_WORLD);
 }
 
+// Scatter for dynamic arrays
+template <typename T>
+void Scatter(T* send_buffer, int count, T* receive_buffer) {
+    printf("rank %d -> In Scatter\n", rank);
+    const int kChunkSize = count / numTasks;
+
+    MPI_Datatype data_type = ResolveType<typename std::remove_all_extents<T>::type>();
+
+    // Scattering matrix1 to all nodes in chunks
+    MPI_Scatter(send_buffer, kChunkSize, data_type, receive_buffer, kChunkSize,
+        data_type, kSource, MPI_COMM_WORLD);
+}
+
 template <typename T, size_t send_size>
 void Broadcast(T(&send_buffer)[send_size], int count) {
     printf("rank %d -> In Broadcast\n", rank);
@@ -298,6 +311,17 @@ void Broadcast(T(&send_buffer)[send_size], int count) {
 
     // Broadcasting the whole matrix2 to all nodes
     MPI_Bcast(send_buffer, count, data_type, kSource, MPI_COMM_WORLD);
+}
+
+// Broadcast for a single variable
+template <typename T>
+void Broadcast(T* send_buffer) {
+    printf("rank %d -> In Broadcast\n", rank);
+
+    MPI_Datatype data_type = ResolveType<typename std::remove_all_extents<T>::type>();
+
+    // Broadcasting the whole matrix2 to all nodes
+    MPI_Bcast(send_buffer, 1, data_type, kSource, MPI_COMM_WORLD);
 }
 
 template <typename T, size_t send_size, size_t receive_size>
