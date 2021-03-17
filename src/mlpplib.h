@@ -237,6 +237,11 @@ void MakeCustomDatatype() {
 }
 
 // Testing accessing class members function
+template<typename T, typename U> constexpr size_t offsetOf(U T::* member)
+{
+    return (char*)&((T*)nullptr->*member) - (char*)nullptr;
+}
+
 template <typename C, typename T>
 void access(C& cls, T C::* member) {
     printf("rank %d -> In smallest access, member: %d\n", rank, cls.*member);
