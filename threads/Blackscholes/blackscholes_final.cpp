@@ -280,13 +280,9 @@ int main(int argc, char** argv)
     // Broadcasting numOptions to all nodes
     Broadcast(&numOptions);
 
-    const int SPLIT = numOptions / numtasks;
+    const int SPLIT = numOptions / NODES;
     prices = (fptype*)malloc(SPLIT * sizeof(fptype));
     data = (OptionData*)malloc(SPLIT * sizeof(OptionData));
-
-    source = 0;
-    sendcount = SPLIT;
-    recvcount = SPLIT;
 
     // Make new MPI_Datatype
     doSomething(&filedata[0], &OptionData::s, &OptionData::strike, &OptionData::r,
@@ -307,10 +303,6 @@ int main(int argc, char** argv)
     // Scattering input data to all nodes
     Scatter(filedata, SPLIT, data);
 
-    //MPI_Iscatter(filedata, sendcount, MPI_OptionData, data, recvcount,
-        //MPI_OptionData, source, MPI_COMM_WORLD, &reqs[0]);
-
-    //MPI_Waitall(1, reqs, stats);
 
 #define PAD 256
 #define LINESIZE 64
@@ -336,8 +328,8 @@ int main(int argc, char** argv)
 
     printf("Size of data: %ld\n", SPLIT * (sizeof(OptionData) + sizeof(int)));
 
-    int from = rank * SPLIT;
-    int to = from + SPLIT;
+    //int from = rank * SPLIT;
+    //int to = from + SPLIT;
     //int res = bs_thread(SPLIT);
     int res = Farm(2, SPLIT, bs_thread);
 
@@ -385,48 +377,6 @@ int main(int argc, char** argv)
     }
     free(filedata);
     free(final_prices);
-
-    //if (rank == 0) {
-    //    printf("rank 0 after wait\n");
-    //    MPI_Wait(&reqs[1], &stats[1]);
-    //    printf("numOptions:%d\n", numOptions);
-    //    for (int i = 0; i < numOptions; i++) {
-    //        printf("%f\n", final_prices[i]);
-    //    }
-
-    //    //Write prices to output file
-    //    file = fopen(outputFile, "w");
-    //    if (file == NULL) {
-    //        printf("ERROR: Unable to open file %s.\n", outputFile);
-    //        exit(1);
-    //    }
-    //    rv = fprintf(file, "%i\n", numOptions);
-    //    if (rv < 0) {
-    //        printf("ERROR: Unable to write to file %s.\n", outputFile);
-    //        fclose(file);
-    //        exit(1);
-    //    }
-    //    for (i = 0; i < numOptions; i++) {
-    //        rv = fprintf(file, "%.18f\n", final_prices[i]);
-    //        if (rv < 0) {
-    //            printf("ERROR: Unable to write to file %s.\n", outputFile);
-    //            fclose(file);
-    //            exit(1);
-    //        }
-    //    }
-    //    rv = fclose(file);
-    //    if (rv != 0) {
-    //        printf("ERROR: Unable to close file %s.\n", outputFile);
-    //        exit(1);
-    //    }
-    //    free(filedata);
-    //    free(final_prices);
-    //}
-
-    //free(data);
-    //free(prices);
-
-    //printf("rank:%d finished.\n", rank);
 
     return 0;
 }
