@@ -28,6 +28,9 @@ MPI_Datatype MPI_Custom;
 MPI_Request reqs[1];
 MPI_Status stats[1];
 
+// Pipeline stuff
+std::vector<int (*)()> stages;
+
 // pthread prototypes
 template<typename R, typename... Args, typename... AArgs>
 int Farm(int num_threads, int input_len, R(*worker)(Args...), AArgs... args);
@@ -293,6 +296,14 @@ void Finish() {
 void Abort() {
     printf("rank %d -> Aborting.\n", rank);
     MPI_Abort(MPI_COMM_WORLD, 1);
+}
+
+// Pipeline implementations
+template<typename R, typename... Args>
+void AddStage(R(*func)(Args...), Args... args) {
+    printf("rank %d -> In AddStage.\n", rank);
+    stages.push_back(func);
+    printf("rank %d -> there are %d stages now.\n", rank, stages.size());
 }
 
 #endif  // _MLPPLIB_H_
