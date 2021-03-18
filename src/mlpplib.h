@@ -17,10 +17,11 @@ const int kMaxThreads = 16;
 int numTasks;  // Number of MPI processes - nodes running the MPI task
 int rank;
 const int kSource = 0;  // Task 0 is the main task
+
+// Vectors used for creating custom MPI datatypes
 std::vector<MPI_Datatype> _type;
 std::vector<int> _blocklen;
 std::vector<MPI_Aint> _disp;
-
 MPI_Datatype MPI_Custom;
 
 // MPI variables for the non-blocking message used in the Gather routine
@@ -35,14 +36,10 @@ int Farm(int num_threads, int input_len, R(*worker)(Args...), AArgs... args);
 void Init();
 template<typename R, typename... Args>
 void Load(R(*func)(Args...), Args... args);
-//template <typename T, size_t send_size, size_t receive_size>
-//void Scatter(T(&send_buffer)[send_size], int count, T(&receive_buffer)[receive_size]);
 template <typename T>
 void Scatter(T* send_buffer, int count, T* receive_buffer);
 template <typename T, size_t send_size>
 void Broadcast(T(&send_buffer)[send_size], int count);
-//template <typename T, size_t send_size, size_t receive_size>
-//void Gather(T(&send_buffer)[send_size], int count, T(&receive_buffer)[receive_size]);
 template <typename T>
 void Gather(T* send_buffer, int count, T* receive_buffer);
 void Finish();
@@ -155,14 +152,8 @@ int Farm(int num_threads, int input_len, R(*worker)(Args...), AArgs... args) {
 // Templated function to return the MPI datatype
 // Code adapted from: https://stackoverflow.com/questions/42490331/generic-mpi-code
 template <typename T>
-MPI_Datatype ResolveType() {
-    printf("rank %d -> In default ResolveType\n", rank);
-    /*MPI_Datatype* type = &_type[0];
-    int* blocklen = &_blocklen[0];
-    MPI_Aint* disp = &_disp[0];
-    MPI_Type_create_struct(_type.size(), blocklen, disp, type, &MPI_Custom);
-    MPI_Type_commit(&MPI_Custom);*/
-
+MPI_Datatype ResolveType() // Default function, returns the custom datatype
+{
     return MPI_Custom;
 }
 
@@ -251,19 +242,6 @@ void Load(R (*func)(Args...), Args... args) {  // TODO make this work for no arg
     }
 }
 
-/*template <typename T, size_t send_size, size_t receive_size>
-void Scatter(T (&send_buffer)[send_size], int count, T (&receive_buffer)[receive_size]) {
-    printf("rank %d -> In Scatter\n", rank);
-    const int kChunkSize = count / numTasks;
-
-    MPI_Datatype data_type = ResolveType<typename std::remove_all_extents<T>::type>();
-
-    // Scattering matrix1 to all nodes in chunks
-    MPI_Scatter(send_buffer, kChunkSize, data_type, receive_buffer, kChunkSize,
-        data_type, kSource, MPI_COMM_WORLD);
-}*/
-
-// Scatter for dynamic arrays
 template <typename T>
 void Scatter(T* send_buffer, int count, T* receive_buffer) {
     printf("rank %d -> In Scatter\n", rank);
@@ -272,7 +250,6 @@ void Scatter(T* send_buffer, int count, T* receive_buffer) {
 
     MPI_Datatype data_type = ResolveType<typename std::remove_all_extents<T>::type>();
 
-    // Scattering matrix1 to all nodes in chunks
     MPI_Scatter(send_buffer, kChunkSize, data_type, receive_buffer, kChunkSize,
         data_type, kSource, MPI_COMM_WORLD);
 }
@@ -283,7 +260,6 @@ void Broadcast(T(&send_buffer)[send_size], int count) {
 
     MPI_Datatype data_type = ResolveType<typename std::remove_all_extents<T>::type>();
 
-    // Broadcasting the whole matrix2 to all nodes
     MPI_Bcast(send_buffer, count, data_type, kSource, MPI_COMM_WORLD);
 }
 
@@ -294,27 +270,8 @@ void Broadcast(T* send_buffer) {
 
     MPI_Datatype data_type = ResolveType<typename std::remove_all_extents<T>::type>();
 
-    // Broadcasting the whole matrix2 to all nodes
     MPI_Bcast(send_buffer, 1, data_type, kSource, MPI_COMM_WORLD);
 }
-
-/*template <typename T, size_t send_size, size_t receive_size>
-void Gather(T (&send_buffer)[send_size], int count, T (&receive_buffer)[receive_size]) {
-    printf("rank %d -> In Gather\n", rank);
-    const int kChunkSize = count / numTasks;
-
-    MPI_Datatype data_type = ResolveType<typename std::remove_all_extents<T>::type>();
-
-
-    // Gather results from all nodes to main node
-    MPI_Igather(send_buffer, kChunkSize, data_type, receive_buffer, kChunkSize,
-        data_type, kSource, MPI_COMM_WORLD, &reqs[0]);
-
-    if (rank == 0) {
-        MPI_Wait(&reqs[0], &stats[0]);
-        printf("rank %d -> Finished gathering\n", rank);
-    }
-}*/
 
 // Gather for dynamic arrays
 template <typename T>
@@ -323,7 +280,6 @@ void Gather(T* send_buffer, int count, T* receive_buffer) {
     const int kChunkSize = count / numTasks;
 
     MPI_Datatype data_type = ResolveType<typename std::remove_all_extents<T>::type>();
-
 
     // Gather results from all nodes to main node
     MPI_Igather(send_buffer, kChunkSize, data_type, receive_buffer, kChunkSize,
@@ -343,7 +299,6 @@ void Finish() {
         printf("rank %d -> Exiting not-main process\n", rank);
         exit(0);
     }
-
 }
 
 void Abort() {

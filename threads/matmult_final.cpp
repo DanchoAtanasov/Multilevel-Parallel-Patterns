@@ -11,20 +11,6 @@ float matrix3[MATRIX_SIZE][MATRIX_SIZE];
 float submatrix[MATRIX_SIZE/NODES][MATRIX_SIZE];
 float result[MATRIX_SIZE/NODES][MATRIX_SIZE];
 
-typedef struct my_struct_ {
-    int a;
-    int b;
-} my_struct;
-
-my_struct d[2];
-
-struct A {
-    int x;
-    int y;
-    int z;
-};
-
-A myA;
 
 int matrixmult(int start, int end, double additionalOption) {
     printf("In matrixmult with %d %d\n", start, end);
@@ -51,32 +37,11 @@ void init_matrices() {
         }
 }
 
-void init_d() {
-    printf("Init d\n");
-    d[0].a = 1;
-    d[0].b = 1;
-    d[1].a = 2;
-    d[1].b = 2;
-}
 
 int main() {
     printf("Beginning of main\n");
 
-    Init();
-    
-    //Load(init_d);
-    //printf("%d %d %d %d\n", d[0].a, d[0].b, d[1].a, d[1].b);
-    /*myA.x = 5;
-    myA.y = 7;
-    myA.z = 9;
-    doSomething(&myA, &A::x, &A::y, &A::z);*/
-    //MakeCustomDatatype(&d[0], &my_struct::a, &my_struct::b);
-    //printf("DANCHO: %d\n", offsetOf(&my_struct::a));
-    //printf("after doSomething: %d, %d\n", myA.x, myA.y);
-    //Broadcast(d, 2);
-    //printf("%d %d %d %d\n", d[0].a, d[0].b, d[1].a, d[1].b);
-    //Finish();
-    
+    Init();    
     Load(init_matrices);
     Scatter(matrix1, MATRIX_SIZE * MATRIX_SIZE, submatrix);
     /*for(int i=0;i<4;i++)
