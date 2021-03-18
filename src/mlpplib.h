@@ -33,14 +33,20 @@ int Farm(int num_threads, int input_len, R(*worker)(Args...), AArgs... args);
 
 // MPI prototypes
 void Init();
-void Load(void(*func)());
+template<typename R, typename... Args>
+void Load(R(*func)(Args...), Args... args);
 template <typename T, size_t send_size, size_t receive_size>
 void Scatter(T(&send_buffer)[send_size], int count, T(&receive_buffer)[receive_size]);
 template <typename T, size_t send_size>
+template <typename T>
+void Scatter(T* send_buffer, int count, T* receive_buffer);
 void Broadcast(T(&send_buffer)[send_size], int count);
 template <typename T, size_t send_size, size_t receive_size>
 void Gather(T(&send_buffer)[send_size], int count, T(&receive_buffer)[receive_size]);
+template <typename T>
+void Gather(T* send_buffer, int count, T* receive_buffer);
 void Finish();
+void Abort();
 
 // pthread implementations
 template<typename R, typename... Args>
@@ -150,19 +156,12 @@ int Farm(int num_threads, int input_len, R(*worker)(Args...), AArgs... args) {
 // Code adapted from: https://stackoverflow.com/questions/42490331/generic-mpi-code
 template <typename T>
 MPI_Datatype ResolveType() {
-    printf("rank %d -> In default ResolveType, creating new datatype\n", rank);
-
-    //MPI_Datatype type[2] = { MPI_INT, MPI_INT };
-    /*std::vector<MPI_Datatype> _type;
-    _type.push_back(MPI_INT);
-    _type.push_back(MPI_INT);*/
-    MPI_Datatype* type = &_type[0];
-    //int blocklen[2] = { 1, 1 };
+    printf("rank %d -> In default ResolveType\n", rank);
+    /*MPI_Datatype* type = &_type[0];
     int* blocklen = &_blocklen[0];
-    //MPI_Aint disp[2] = { offsetof(T, a), offsetof(T, b) };
     MPI_Aint* disp = &_disp[0];
     MPI_Type_create_struct(_type.size(), blocklen, disp, type, &MPI_Custom);
-    MPI_Type_commit(&MPI_Custom);
+    MPI_Type_commit(&MPI_Custom);*/
 
     return MPI_Custom;
 }
@@ -203,40 +202,8 @@ MPI_Datatype ResolveType<short>()
     return MPI_SHORT;
 }
 
-template <typename T>
-void MakeCustomDatatype() {
-    printf("rank %d -> In MakeCustomDatatype\n", rank);
-
-    //T dancho = T();
-    //dancho.a = 5;
-    //dancho.b = 4.2f;
-
-    //MPI_Datatype MPI_T;
-    MPI_Datatype a = ResolveType<typename std::remove_all_extents<int>::type>();
-    MPI_Datatype b = ResolveType<typename std::remove_all_extents<T>::type>();
-    
-    
-    
-    MPI_Datatype type[2] = { MPI_INT, MPI_FLOAT };
-    int blocklen[2] = { 1, 1 };
-    MPI_Aint disp[2] = { offsetof(T, a), offsetof(T, b) };
-    MPI_Type_create_struct(2, blocklen, disp, type, &MPI_Custom);
-    MPI_Type_commit(&MPI_Custom);
-
-    // This needs work to be adaptable for all kinds of structs
-    /*MPI_Datatype MPI_OptionData;
-    MPI_Datatype type[9] = { MPI_FLOAT, MPI_FLOAT, MPI_FLOAT, MPI_FLOAT, MPI_FLOAT, MPI_FLOAT,
-        MPI_CHAR,  MPI_FLOAT,  MPI_FLOAT };
-    int blocklen[9] = { 1, 1, 1, 1, 1, 1, 1, 1, 1 };
-    MPI_Aint disp[9] = { offsetof(OptionData, s), offsetof(OptionData, strike), offsetof(OptionData, r),
-        offsetof(OptionData, divq),  offsetof(OptionData, v),  offsetof(OptionData, t),
-        offsetof(OptionData, OptionType),  offsetof(OptionData, divs),  offsetof(OptionData, DGrefval), };
-    MPI_Type_create_struct(9, blocklen, disp, type, &MPI_OptionData);
-    MPI_Type_commit(&MPI_OptionData);*/
-
-}
-
-// Testing accessing class members function
+// Custom offsetOf fuction
+// Code taken from: https://stackoverflow.com/questions/13180842/how-to-calculate-offset-of-a-class-member-at-compile-time
 template<typename T, typename U> constexpr size_t offsetOf(U T::* member)
 {
     return (char*)&((T*)nullptr->*member) - (char*)nullptr;
@@ -244,25 +211,30 @@ template<typename T, typename U> constexpr size_t offsetOf(U T::* member)
 
 template <typename C, typename T>
 void access(C& cls, T C::* member) {
-    printf("rank %d -> In smallest access, member: %d\n", rank, cls.*member);
+    //printf("rank %d -> In smallest access, member: %d\n", rank, cls.*member);
     _type.push_back(ResolveType<typename std::remove_all_extents<T>::type>());
     _blocklen.push_back(1);
     _disp.push_back(offsetOf(member));
-    //return (cls.*member);
 }
 
 template <typename C, typename T, typename... Mems>
 void access(C& cls, T C::* member, Mems... rest) {
-    printf("rank %d -> In bigger access, sizeof rest:%d\n", rank, sizeof...(Mems));
+    //printf("rank %d -> In bigger access, sizeof rest:%d\n", rank, sizeof...(Mems));
     access(cls, member);
     if (sizeof...(Mems) > 0) access(cls, rest...);
-    //return access((cls), rest...);
 }
 
 template <typename T, typename... Members>
-void doSomething(T* a, Members... mems) {
-    printf("rank %d -> In do sth\n", rank);
+void MakeCustomDatatype(T* a, Members... mems) {
+    printf("rank %d -> In MakeCustomDatatype\n", rank);
     access(*a, mems...);
+
+    // Creating the datatype
+    MPI_Datatype* type = &_type[0];
+    int* blocklen = &_blocklen[0];
+    MPI_Aint* disp = &_disp[0];
+    MPI_Type_create_struct(_type.size(), blocklen, disp, type, &MPI_Custom);
+    MPI_Type_commit(&MPI_Custom);
 }
 
 void Init() {
@@ -315,7 +287,7 @@ void Broadcast(T(&send_buffer)[send_size], int count) {
     MPI_Bcast(send_buffer, count, data_type, kSource, MPI_COMM_WORLD);
 }
 
-// Broadcast for a single variable
+// Broadcast for a single variable // TODO make this for dynamic arrays
 template <typename T>
 void Broadcast(T* send_buffer) {
     printf("rank %d -> In Broadcast\n", rank);

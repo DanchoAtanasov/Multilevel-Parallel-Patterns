@@ -70,7 +70,7 @@ int main() {
     myA.y = 7;
     myA.z = 9;
     doSomething(&myA, &A::x, &A::y, &A::z);*/
-    doSomething(&d[0], &my_struct::a, &my_struct::b);
+    MakeCustomDatatype(&d[0], &my_struct::a, &my_struct::b);
     printf("DANCHO: %d\n", offsetOf(&my_struct::a));
     //printf("after doSomething: %d, %d\n", myA.x, myA.y);
     Broadcast(d, 2);

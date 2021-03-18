@@ -280,7 +280,7 @@ int main(int argc, char** argv)
     data = (OptionData*)malloc(SPLIT * sizeof(OptionData));
 
     // Make new MPI_Datatype
-    doSomething(&data[0], &OptionData::s, &OptionData::strike, &OptionData::r,
+    MakeCustomDatatype(&data[0], &OptionData::s, &OptionData::strike, &OptionData::r,
         &OptionData::divq, &OptionData::v, &OptionData::t, &OptionData::OptionType,
         &OptionData::divs, &OptionData::DGrefval);
 
