@@ -35,14 +35,14 @@ int Farm(int num_threads, int input_len, R(*worker)(Args...), AArgs... args);
 void Init();
 template<typename R, typename... Args>
 void Load(R(*func)(Args...), Args... args);
-template <typename T, size_t send_size, size_t receive_size>
-void Scatter(T(&send_buffer)[send_size], int count, T(&receive_buffer)[receive_size]);
-template <typename T, size_t send_size>
+//template <typename T, size_t send_size, size_t receive_size>
+//void Scatter(T(&send_buffer)[send_size], int count, T(&receive_buffer)[receive_size]);
 template <typename T>
 void Scatter(T* send_buffer, int count, T* receive_buffer);
+template <typename T, size_t send_size>
 void Broadcast(T(&send_buffer)[send_size], int count);
-template <typename T, size_t send_size, size_t receive_size>
-void Gather(T(&send_buffer)[send_size], int count, T(&receive_buffer)[receive_size]);
+//template <typename T, size_t send_size, size_t receive_size>
+//void Gather(T(&send_buffer)[send_size], int count, T(&receive_buffer)[receive_size]);
 template <typename T>
 void Gather(T* send_buffer, int count, T* receive_buffer);
 void Finish();
@@ -251,7 +251,7 @@ void Load(R (*func)(Args...), Args... args) {  // TODO make this work for no arg
     }
 }
 
-template <typename T, size_t send_size, size_t receive_size>
+/*template <typename T, size_t send_size, size_t receive_size>
 void Scatter(T (&send_buffer)[send_size], int count, T (&receive_buffer)[receive_size]) {
     printf("rank %d -> In Scatter\n", rank);
     const int kChunkSize = count / numTasks;
@@ -261,7 +261,7 @@ void Scatter(T (&send_buffer)[send_size], int count, T (&receive_buffer)[receive
     // Scattering matrix1 to all nodes in chunks
     MPI_Scatter(send_buffer, kChunkSize, data_type, receive_buffer, kChunkSize,
         data_type, kSource, MPI_COMM_WORLD);
-}
+}*/
 
 // Scatter for dynamic arrays
 template <typename T>
@@ -298,7 +298,7 @@ void Broadcast(T* send_buffer) {
     MPI_Bcast(send_buffer, 1, data_type, kSource, MPI_COMM_WORLD);
 }
 
-template <typename T, size_t send_size, size_t receive_size>
+/*template <typename T, size_t send_size, size_t receive_size>
 void Gather(T (&send_buffer)[send_size], int count, T (&receive_buffer)[receive_size]) {
     printf("rank %d -> In Gather\n", rank);
     const int kChunkSize = count / numTasks;
@@ -314,7 +314,7 @@ void Gather(T (&send_buffer)[send_size], int count, T (&receive_buffer)[receive_
         MPI_Wait(&reqs[0], &stats[0]);
         printf("rank %d -> Finished gathering\n", rank);
     }
-}
+}*/
 
 // Gather for dynamic arrays
 template <typename T>

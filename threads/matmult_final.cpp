@@ -1,8 +1,8 @@
 #include <iostream>
 #include "../src/mlpplib.h"
 
-const int MATRIX_SIZE = 8;
-const int NODES = 1;
+const int MATRIX_SIZE = 1024;
+const int NODES = 4;
 
 float matrix1[MATRIX_SIZE][MATRIX_SIZE];
 float matrix2[MATRIX_SIZE][MATRIX_SIZE];
@@ -64,31 +64,31 @@ int main() {
 
     Init();
     
-    Load(init_d);
-    printf("%d %d %d %d\n", d[0].a, d[0].b, d[1].a, d[1].b);
+    //Load(init_d);
+    //printf("%d %d %d %d\n", d[0].a, d[0].b, d[1].a, d[1].b);
     /*myA.x = 5;
     myA.y = 7;
     myA.z = 9;
     doSomething(&myA, &A::x, &A::y, &A::z);*/
-    MakeCustomDatatype(&d[0], &my_struct::a, &my_struct::b);
-    printf("DANCHO: %d\n", offsetOf(&my_struct::a));
+    //MakeCustomDatatype(&d[0], &my_struct::a, &my_struct::b);
+    //printf("DANCHO: %d\n", offsetOf(&my_struct::a));
     //printf("after doSomething: %d, %d\n", myA.x, myA.y);
-    Broadcast(d, 2);
-    printf("%d %d %d %d\n", d[0].a, d[0].b, d[1].a, d[1].b);
-    Finish();
+    //Broadcast(d, 2);
+    //printf("%d %d %d %d\n", d[0].a, d[0].b, d[1].a, d[1].b);
+    //Finish();
     
-    /*Load(init_matrices);
+    Load(init_matrices);
     Scatter(matrix1, MATRIX_SIZE * MATRIX_SIZE, submatrix);
     /*for(int i=0;i<4;i++)
         for(int j=0;j<8;j++)
             printf("sm[%d][%d]:%.2f\n", i, j, submatrix[i][j]);*/
-    /*Broadcast(matrix2, MATRIX_SIZE * MATRIX_SIZE);
+    Broadcast(matrix2, MATRIX_SIZE * MATRIX_SIZE);
     int res = Farm(2, MATRIX_SIZE, matrixmult, 35.50);
     Gather(result, MATRIX_SIZE * MATRIX_SIZE, matrix3);
     Finish();
 
     printf("First and last values in the matrix are: %.0f, %.0f\n", matrix3[0][0], matrix3[MATRIX_SIZE - 1][MATRIX_SIZE - 1]);
-    for (int i = 0; i < MATRIX_SIZE; i++) {
+    /*for (int i = 0; i < MATRIX_SIZE; i++) {
         for (int j = 0; j < MATRIX_SIZE; j++) {
             printf("%.2f ", matrix3[i][j]);
         }

@@ -19,7 +19,7 @@
 
 #define NUM_RUNS 100
 
-const int NODES = 2;
+const int NODES = 4;
 
 typedef struct OptionData_ {
     fptype s;          // spot price
@@ -334,7 +334,7 @@ int main(int argc, char** argv)
     }
 
     //Write prices to output file
-    printf("Writing results to %s", outputFile);
+    printf("Writing results to %s\n", outputFile);
     file = fopen(outputFile, "w");
     if (file == NULL) {
         printf("ERROR: Unable to open file %s.\n", outputFile);
