@@ -310,31 +310,31 @@ int main(int argc, char** argv)
         volatility[i] = data[i].v;
         otime[i] = data[i].t;
 
-	    printf("%d, %.2f, %.2f, %.2f, %.2f, %.2f\n",
-	        otype[i],sptprice[i],strike[i],rate[i], volatility[i],otime[i]);
+	    //printf("%d, %.2f, %.2f, %.2f, %.2f, %.2f\n",
+	    //    otype[i],sptprice[i],strike[i],rate[i], volatility[i],otime[i]);
     }
 
     printf("Size of data: %ld\n", SPLIT * (sizeof(OptionData) + sizeof(int)));
 
-    //int from = rank * SPLIT;
-    //int to = from + SPLIT;
-    //int res = bs_thread(SPLIT);
+    // Call Farm pattern
     int res = Farm(2, numOptions, bs_thread);
 
+    // Gather results
     Gather(prices, numOptions, final_prices);
 
     free(data);
     free(prices);
 
+    // Stop not-main processes
     Finish();
 
-    printf("rank 0 after wait\n");
     printf("numOptions:%d\n", numOptions);
     for (int i = 0; i < numOptions; i++) {
         printf("%f\n", final_prices[i]);
     }
 
     //Write prices to output file
+    printf("Writing results to %s", outputFile);
     file = fopen(outputFile, "w");
     if (file == NULL) {
         printf("ERROR: Unable to open file %s.\n", outputFile);
