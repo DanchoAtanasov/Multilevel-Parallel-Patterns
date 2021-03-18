@@ -39,8 +39,6 @@ OptionData* filedata;
 fptype* prices;
 fptype* final_prices;
 int numOptions;
-
-
 FILE* file;
 int rv;
 
@@ -202,41 +200,27 @@ int bs_thread(int start, int end) {
                 rate[i], volatility[i], otime[i],
                 otype[i], 0);
             prices[i] = price;
-	    //printf("DANCHO price: %.4f\n", price);
-
         }
     }
 
     return 0;
 }
 
-void readFile(int argc, char** argv) {
+void readFile(char* inputFile) {
     printf("Beginning of readFile\n");
-    
-    
-    int loopnum;
-
-    if (argc != 4)
-    {
-        printf("Usage:\n\t%s <nthreads> <inputFile> <outputFile>\n", argv[0]);
-        MPI_Abort(MPI_COMM_WORLD, 1);
-        exit(1);
-    }
-    nThreads = atoi(argv[1]);
-    char* inputFile = argv[2];
 
     //Read input data from file
     file = fopen(inputFile, "r");
     if (file == NULL) {
         printf("ERROR: Unable to open file %s.\n", inputFile);
-        MPI_Abort(MPI_COMM_WORLD, 1);
+        Abort();
         exit(1);
     }
     rv = fscanf(file, "%i", &numOptions);
     if (rv != 1) {
         printf("ERROR: Unable to read from file %s.\n", inputFile);
         fclose(file);
-        MPI_Abort(MPI_COMM_WORLD, 1);
+        Abort();
         exit(1);
     }
     if (nThreads > numOptions) {
@@ -247,14 +231,11 @@ void readFile(int argc, char** argv) {
     printf("Num of Options: %d\n", numOptions);
     printf("Num of Runs: %d\n", NUM_RUNS);
 
-    //}
-
     // alloc spaces for the option data
     filedata = (OptionData*)malloc(numOptions * sizeof(OptionData));
     final_prices = (fptype*)malloc(numOptions * sizeof(fptype));
 
-    //if(rank == 0){
-    for (loopnum = 0; loopnum < numOptions; ++loopnum)
+    for (int loopnum = 0; loopnum < numOptions; ++loopnum)
     {
         rv = fscanf(file, "%f %f %f %f %f %f %c %f %f", &filedata[loopnum].s, &filedata[loopnum].strike, &filedata[loopnum].r, &filedata[loopnum].divq, &filedata[loopnum].v, &filedata[loopnum].t, &filedata[loopnum].OptionType, &filedata[loopnum].divs, &filedata[loopnum].DGrefval);
         if (rv != 9) {
@@ -268,21 +249,28 @@ void readFile(int argc, char** argv) {
         printf("ERROR: Unable to close file %s.\n", inputFile);
         exit(1);
     }
-
-    
     printf("Load done\n");
 }
 
 int main(int argc, char** argv)
 {
+    if (argc != 4)
+    {
+        printf("Usage:\n\t%s <nthreads> <inputFile> <outputFile>\n", argv[0]);
+        Abort();
+        exit(1);
+    }
 
     fptype* buffer;
     int* buffer2;
     int i;
+
+    nThreads = atoi(argv[1]);
+    char* inputFile = argv[2];
     char* outputFile = argv[3];
     
     Init();
-    Load(readFile, argc, argv);
+    Load(readFile, inputFile);
 
     // Broadcasting numOptions to all nodes
     Broadcast(&numOptions);
@@ -295,18 +283,7 @@ int main(int argc, char** argv)
     doSomething(&data[0], &OptionData::s, &OptionData::strike, &OptionData::r,
         &OptionData::divq, &OptionData::v, &OptionData::t, &OptionData::OptionType,
         &OptionData::divs, &OptionData::DGrefval);
-    /*
-    * fptype s;          // spot price
-    fptype strike;     // strike price
-    fptype r;          // risk-free interest rate
-    fptype divq;       // dividend rate
-    fptype v;          // volatility
-    fptype t;          // time to maturity or option expiration in years 
-                       //     (1yr = 1.0, 6mos = 0.5, 3mos = 0.25, ..., etc)  
-    char OptionType;   // Option type.  "P"=PUT, "C"=CALL
-    fptype divs;       // dividend vals (not used in this test)
-    fptype DGrefval;
-    */
+
     // Scattering input data to all nodes
     Scatter(filedata, SPLIT, data);
 
@@ -333,26 +310,15 @@ int main(int argc, char** argv)
         volatility[i] = data[i].v;
         otime[i] = data[i].t;
         
-	printf("%d, %.2f, %.2f, %.2f, %.2f, %.2f\n",
-	otype[i],
-        sptprice[i],
-        strike[i],
-        rate[i], 
-        volatility[i],
-        otime[i]);
+	    printf("%d, %.2f, %.2f, %.2f, %.2f, %.2f\n",
+	        otype[i],sptprice[i],strike[i],rate[i], volatility[i],otime[i]);
     }
 
     printf("Size of data: %ld\n", SPLIT * (sizeof(OptionData) + sizeof(int)));
 
-    //int from = rank * SPLIT;
-    //int to = from + SPLIT;
-    //int res = bs_thread(SPLIT);
     int res = Farm(2, SPLIT, bs_thread);
 
     Gather(prices, SPLIT, final_prices);
-
-    //MPI_Igather(prices, sendcount, MPI_FLOAT, final_prices, recvcount,
-      //  MPI_FLOAT, source, MPI_COMM_WORLD, &reqs[1]);
 
     free(data);
     free(prices);

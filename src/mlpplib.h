@@ -375,4 +375,9 @@ void Finish() {
 
 }
 
+void Abort() {
+    printf("rank %d -> Aborting.\n", rank);
+    MPI_Abort(MPI_COMM_WORLD, 1);
+}
+
 #endif  // _MLPPLIB_H_
