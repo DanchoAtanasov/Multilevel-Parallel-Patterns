@@ -308,7 +308,7 @@ int main(int argc, char** argv)
     fptype DGrefval;
     */
     // Scattering input data to all nodes
-    Scatter(filedata, SPLIT, data);
+    Scatter(filedata, numOptions, data);
 
     printf("Scatter done, SPLIT:%d, numOptions:%d\n", SPLIT, numOptions);
 
@@ -347,9 +347,9 @@ int main(int argc, char** argv)
     //int from = rank * SPLIT;
     //int to = from + SPLIT;
     //int res = bs_thread(SPLIT);
-    int res = Farm(2, SPLIT, bs_thread);
+    int res = Farm(2, numOptions, bs_thread);
 
-    Gather(prices, SPLIT, final_prices);
+    Gather(prices, numOptions, final_prices);
 
     //MPI_Igather(prices, sendcount, MPI_FLOAT, final_prices, recvcount,
       //  MPI_FLOAT, source, MPI_COMM_WORLD, &reqs[1]);

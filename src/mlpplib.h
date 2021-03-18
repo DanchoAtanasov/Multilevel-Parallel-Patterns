@@ -255,7 +255,6 @@ template <typename C, typename T, typename... Mems>
 void access(C& cls, T C::* member, Mems... rest) {
     printf("rank %d -> In bigger access, sizeof rest:%d\n", rank, sizeof...(Mems));
     access(cls, member);
-    printf("rank %d -> ARE WE HERE???:%d\n", rank, sizeof...(Mems));
     if (sizeof...(Mems) > 0) access(cls, rest...);
     //return access((cls), rest...);
 }
