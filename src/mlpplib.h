@@ -38,8 +38,10 @@ template<typename R, typename... Args>
 void Load(R(*func)(Args...), Args... args);
 template <typename T>
 void Scatter(T* send_buffer, int count, T* receive_buffer);
-template <typename T, size_t send_size>
-void Broadcast(T(&send_buffer)[send_size], int count);
+template <typename T>
+void Broadcast(T* send_buffer, int count);
+//template <typename T, size_t send_size>
+//void Broadcast(T(&send_buffer)[send_size], int count);
 template <typename T>
 void Gather(T* send_buffer, int count, T* receive_buffer);
 void Finish();
@@ -254,23 +256,23 @@ void Scatter(T* send_buffer, int count, T* receive_buffer) {
         data_type, kSource, MPI_COMM_WORLD);
 }
 
-template <typename T, size_t send_size>
-void Broadcast(T(&send_buffer)[send_size], int count) {
+//template <typename T, size_t send_size>
+//void Broadcast(T(&send_buffer)[send_size], int count) {
+//    printf("rank %d -> In Broadcast\n", rank);
+//
+//    MPI_Datatype data_type = ResolveType<typename std::remove_all_extents<T>::type>();
+//
+//    MPI_Bcast(send_buffer, count, data_type, kSource, MPI_COMM_WORLD);
+//}
+
+// Broadcast for a single variable // TODO make this for dynamic arrays
+template <typename T>
+void Broadcast(T* send_buffer, int count) {
     printf("rank %d -> In Broadcast\n", rank);
 
     MPI_Datatype data_type = ResolveType<typename std::remove_all_extents<T>::type>();
 
     MPI_Bcast(send_buffer, count, data_type, kSource, MPI_COMM_WORLD);
-}
-
-// Broadcast for a single variable // TODO make this for dynamic arrays
-template <typename T>
-void Broadcast(T* send_buffer) {
-    printf("rank %d -> In Broadcast\n", rank);
-
-    MPI_Datatype data_type = ResolveType<typename std::remove_all_extents<T>::type>();
-
-    MPI_Bcast(send_buffer, 1, data_type, kSource, MPI_COMM_WORLD);
 }
 
 // Gather for dynamic arrays

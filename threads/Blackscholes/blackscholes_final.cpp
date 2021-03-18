@@ -273,7 +273,7 @@ int main(int argc, char** argv)
     Load(readFile, inputFile);
 
     // Broadcasting numOptions to all nodes
-    Broadcast(&numOptions);
+    Broadcast(&numOptions, 1);
 
     const int SPLIT = numOptions / NODES;
     prices = (fptype*)malloc(SPLIT * sizeof(fptype));
