@@ -3,8 +3,8 @@
 // Black-Scholes
 // Analytical method for calculating European Options
 //
-// 
-// Reference Source: Options, Futures, and Other Derivatives, 3rd Edition, Prentice 
+//
+// Reference Source: Options, Futures, and Other Derivatives, 3rd Edition, Prentice
 // Hall, John C. Hull,
 
 #include <stdio.h>
@@ -27,8 +27,8 @@ typedef struct OptionData_ {
     fptype r;          // risk-free interest rate
     fptype divq;       // dividend rate
     fptype v;          // volatility
-    fptype t;          // time to maturity or option expiration in years 
-                       //     (1yr = 1.0, 6mos = 0.5, 3mos = 0.25, ..., etc)  
+    fptype t;          // time to maturity or option expiration in years
+                       //     (1yr = 1.0, 6mos = 0.5, 3mos = 0.25, ..., etc)
     char OptionType;   // Option type.  "P"=PUT, "C"=CALL
     fptype divs;       // dividend vals (not used in this test)
     fptype DGrefval;   // DerivaGem Reference Value
@@ -268,7 +268,7 @@ int main(int argc, char** argv)
     nThreads = atoi(argv[1]);
     char* inputFile = argv[2];
     char* outputFile = argv[3];
-    
+
     Init();
     Load(readFile, inputFile);
 
@@ -285,7 +285,7 @@ int main(int argc, char** argv)
         &OptionData::divs, &OptionData::DGrefval);
 
     // Scattering input data to all nodes
-    Scatter(filedata, SPLIT, data);
+    Scatter(filedata, numOptions, data);
 
     printf("Scatter done, SPLIT:%d, numOptions:%d\n", SPLIT, numOptions);
 
@@ -309,16 +309,19 @@ int main(int argc, char** argv)
         rate[i] = data[i].r;
         volatility[i] = data[i].v;
         otime[i] = data[i].t;
-        
+
 	    printf("%d, %.2f, %.2f, %.2f, %.2f, %.2f\n",
 	        otype[i],sptprice[i],strike[i],rate[i], volatility[i],otime[i]);
     }
 
     printf("Size of data: %ld\n", SPLIT * (sizeof(OptionData) + sizeof(int)));
 
-    int res = Farm(2, SPLIT, bs_thread);
+    //int from = rank * SPLIT;
+    //int to = from + SPLIT;
+    //int res = bs_thread(SPLIT);
+    int res = Farm(2, numOptions, bs_thread);
 
-    Gather(prices, SPLIT, final_prices);
+    Gather(prices, numOptions, final_prices);
 
     free(data);
     free(prices);
@@ -361,4 +364,3 @@ int main(int argc, char** argv)
 
     return 0;
 }
-
