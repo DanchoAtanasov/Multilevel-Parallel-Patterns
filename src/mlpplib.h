@@ -273,7 +273,7 @@ void Init() {
 }
 
 template<typename R, typename... Args>
-void Load(R (*func)(Args...), Args... args) {
+void Load(R (*func)(Args...), Args... args) {  // TODO make this work for no arguments
     if (rank == 0) {
         printf("rank %d -> In load\n", rank);
         (*func)(args...);
