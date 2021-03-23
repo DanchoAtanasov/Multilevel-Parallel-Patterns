@@ -4,10 +4,12 @@
 const int NODES = 4;
 
 int stage1(int a, int b) {
+	printf("In stage1 with %d and %d\n", a, b);
 	return a + b;
 }
 
 int stage2(int a, int b) {
+	printf("In stage2 with %d and %d\n", a, b);
 	return a - b;
 }
 

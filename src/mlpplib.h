@@ -306,4 +306,14 @@ void AddStage(R(*func)(Args...), Args... args) {
     printf("rank %d -> there are %d stages now.\n", rank, stages.size());
 }
 
+void RunPipeline() {
+    /*for (int i = 0; i < stages.size(); i++) {
+        if (rank == i) {
+            stages.at(i)
+        }
+    }*/
+    printf("rank %d -> In RunPipeline.\n", rank);
+    stages.at(rank)(1, 2);
+}
+
 #endif  // _MLPPLIB_H_
