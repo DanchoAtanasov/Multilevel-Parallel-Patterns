@@ -29,7 +29,9 @@ MPI_Request reqs[1];
 MPI_Status stats[1];
 
 // Pipeline stuff
-std::vector<int (*)(int, int)> stages;
+std::vector<int (*)(int)> stages;
+MPI_Request pipeline_reqs[2];
+MPI_Status pipeline_stats[2];
 
 // pthread prototypes
 template<typename R, typename... Args, typename... AArgs>
@@ -307,13 +309,22 @@ void AddStage(R(*func)(Args...), Args... args) {
 }
 
 void RunPipeline() {
-    /*for (int i = 0; i < stages.size(); i++) {
-        if (rank == i) {
-            stages.at(i)
-        }
-    }*/
     printf("rank %d -> In RunPipeline.\n", rank);
-    stages.at(rank)(1, 2);
+    prev = (rank - 1) % numTasks;
+    next = (rank + 1) % numTasks;
+
+    int input = 5;
+    
+    MPI_Irecv(&input, 1, MPI_INT, prev, 0, MPI_COMM_WORLD, &pipeline_reqs[0]);
+
+    if (rank != 0) {
+        MPI_Wait(&reqs[0], &stats[0]);
+    }
+
+    int result = stages.at(rank)(input);
+
+    MPI_Isend(&result, 1, MPI_INT, next, 0, MPI_COMM_WORLD, &pipeline_reqs[1])
+
 }
 
 #endif  // _MLPPLIB_H_
