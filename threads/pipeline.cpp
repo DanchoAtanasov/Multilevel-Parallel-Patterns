@@ -10,6 +10,8 @@ int stage1(int a) {
 
 int stage2(int a) {
 	printf("In stage2 with %d\n", a);
+	int b = 0;
+	for (int i=0;i<10000000;i++) b += i;
 	return a + 2;
 }
 

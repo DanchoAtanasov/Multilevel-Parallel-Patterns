@@ -314,17 +314,18 @@ void RunPipeline() {
     int next = (rank + 1);// % numTasks;
     //printf("rank %d -> prev %d next %d.\n", rank, prev, next);
 
-    int input = 5;
+    int input = 0;
 
-    for (int i = 0; i < 2; i++) {
+    for (int i = 0; i < 5; i++) {
+        printf("rank %d -> In loop %d.\n", rank, i);
         if (rank != 0) {
             printf("rank %d -> Waiting.\n", rank);
-            MPI_Irecv(&i, 1, MPI_INT, prev, 0, MPI_COMM_WORLD, &pipeline_reqs[0]);
+            MPI_Irecv(&input, 1, MPI_INT, prev, 0, MPI_COMM_WORLD, &pipeline_reqs[0]);
             MPI_Wait(&pipeline_reqs[0], &pipeline_stats[0]);
             printf("rank %d -> Wait over.\n", rank);
         }
 
-        int result = stages.at(rank)(i);
+        int result = stages.at(rank)(input);
         printf("rank %d -> Result calculated to be %d\n", rank, result);
 
         if (next != numTasks) MPI_Isend(&result, 1, MPI_INT, next, 0, MPI_COMM_WORLD, &pipeline_reqs[0]);
