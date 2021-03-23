@@ -303,27 +303,30 @@ void Abort() {
 // Pipeline implementations
 template<typename R, typename... Args>
 void AddStage(R(*func)(Args...), Args... args) {
-    printf("rank %d -> In AddStage.\n", rank);
+    if (rank == 0) printf("rank %d -> In AddStage.\n", rank);
     stages.push_back(func);
-    printf("rank %d -> there are %d stages now.\n", rank, stages.size());
+    //printf("rank %d -> there are %d stages now.\n", rank, stages.size());
 }
 
 void RunPipeline() {
     printf("rank %d -> In RunPipeline.\n", rank);
-    prev = (rank - 1) % numTasks;
-    next = (rank + 1) % numTasks;
+    int prev = (rank - 1);// % numTasks;
+    int next = (rank + 1);// % numTasks;
+    //printf("rank %d -> prev %d next %d.\n", rank, prev, next);
 
     int input = 5;
-    
-    MPI_Irecv(&input, 1, MPI_INT, prev, 0, MPI_COMM_WORLD, &pipeline_reqs[0]);
 
     if (rank != 0) {
-        MPI_Wait(&reqs[0], &stats[0]);
+        printf("rank %d -> Waiting.\n", rank);
+    	MPI_Irecv(&input, 1, MPI_INT, prev, 0, MPI_COMM_WORLD, &pipeline_reqs[0]);
+        MPI_Wait(&pipeline_reqs[0], &pipeline_stats[0]);
+        printf("rank %d -> Wait over.\n", rank);
     }
 
     int result = stages.at(rank)(input);
+    printf("rank %d -> Result calculated to be %d\n", rank, result);
 
-    MPI_Isend(&result, 1, MPI_INT, next, 0, MPI_COMM_WORLD, &pipeline_reqs[1])
+    if(next != numTasks) MPI_Isend(&result, 1, MPI_INT, next, 0, MPI_COMM_WORLD, &pipeline_reqs[0]);
 
 }
 
