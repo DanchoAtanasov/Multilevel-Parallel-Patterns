@@ -29,7 +29,7 @@ MPI_Request reqs[1];
 MPI_Status stats[1];
 
 // Pipeline stuff
-std::vector<int (*)()> stages;
+std::vector<int (*)(int, int)> stages;
 
 // pthread prototypes
 template<typename R, typename... Args, typename... AArgs>
