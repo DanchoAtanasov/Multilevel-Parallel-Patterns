@@ -321,7 +321,7 @@ void RunPipeline() {
         if (rank != 0) {
             printf("rank %d -> Waiting.\n", rank);
             MPI_Irecv(&input, 1, MPI_INT, prev, 0, MPI_COMM_WORLD, &pipeline_reqs[0]);
-            MPI_Wait(&pipeline_reqs[0], &pipeline_stats[0]);
+            MPI_Wait(&pipeline_reqs[0], &pipeline_stats[0]); // TODO check if this can be blocking
             printf("rank %d -> Wait over.\n", rank);
         }
 
