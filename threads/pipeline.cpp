@@ -29,10 +29,10 @@ int stage4(int a) {
 int main() {
 
 	Init();
-	AddStage<int>(stage1, 1);
-	AddStage<int>(stage2, 1);
-	AddStage<int>(stage3, 1);
-	AddStage<int>(stage4, 1);
+	AddStage(stage1, 1);
+	AddStage(stage2);
+	AddStage(stage3);
+	AddStage(stage4);
 	//RunPipeline();
 	Finish();
 	return 0;
