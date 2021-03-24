@@ -75,6 +75,26 @@ struct ThreadData {
         return func(args);
     }
 };
+
+struct Stage {
+    template<typename R, typename... Args> ThreadData<R, Args...> stage;
+
+    template<typename R, typename... Args>
+    void add(R(*func)(Args...), Args... args) {
+        stage = ;
+        stage = new ThreadData<R, Args...>();
+        stage.thread_id = rank;
+        stage.worker = func;
+        stage.args = std::tuple<Args...>(args...);
+    }
+    template<typename R, typename... Args>
+    R(*)(Args...) get() {
+        return stage;
+    }
+
+};
+
+Stage _stage;
 template<typename R, typename... Args> ThreadData<R, Args...>* stage_fnc; //TODO move this up
 
 // WorkerWrapper function that is called on separate threads,
@@ -308,10 +328,11 @@ void AddStage(R(*func)(Args...), Args... args) {
     if (rank == 0) printf("rank %d -> In AddStage.\n", rank);
     stages.push_back(func);
     if (rank == stage_counter) {
-        stage_fnc<R, Args...> = new ThreadData<R, Args...>();
+        _stage.add(func, args...);
+        /*stage_fnc<R, Args...> = new ThreadData<R, Args...>();
         stage_fnc<R, Args...>->thread_id = rank;
         stage_fnc<R, Args...>->worker = func;
-        stage_fnc<R, Args...>->args = std::tuple<Args...>(args...);
+        stage_fnc<R, Args...>->args = std::tuple<Args...>(args...);*/
     }
     stage_counter++;
 
@@ -335,7 +356,8 @@ void RunPipeline() {
             printf("rank %d -> Wait over.\n", rank);
         }
 
-        int result = stage_fnc->run_worker(input);
+        int result = _stage.get();
+        //int result = stage_fnc->run_worker(input);
         //int result = stages.at(rank)(input);
         printf("rank %d -> Result calculated to be %d\n", rank, result);
 
