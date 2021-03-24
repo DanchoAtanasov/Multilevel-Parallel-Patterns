@@ -303,15 +303,15 @@ void Abort() {
 
 // Pipeline implementations
 template<typename R, typename... Args, typename... AArgs>
-void AddStage(R(*func)(Args...), AArgs... args) {
+void AddStage(R(*func)(Args...), AArgs... args) { // TODO maybe add optional args
     if (rank == stage_counter) {
         printf("rank %d -> In AddStage.\n", rank);
         int prev = (rank - 1);
         int next = (rank + 1);
 
-        std::tuple_element<0, std::tuple<Args...>>::type input;
+        typename std::tuple_element<0, std::tuple<Args...>>::type input;
 	    MPI_Datatype data_type = ResolveType<typename std::remove_all_extents<
-            std::tuple_element<0, std::tuple<Args...>>::type>::type>();
+            typename std::tuple_element<0, std::tuple<Args...>>::type>::type>();
         //MPI_Datatype data_type = ResolveType<typename std::remove_all_extents<I>::type>();
 	    MPI_Datatype data_type_send = ResolveType<typename std::remove_all_extents<R>::type>();
         //int input = 0;
@@ -328,8 +328,9 @@ void AddStage(R(*func)(Args...), AArgs... args) {
                 result = (*func)(input);
             }
             else {
+
 	        printf("args[0]:%d\n", std::get<0>(std::tuple<int>(args...)));
-                result = (*func)(args...);
+                result = (*func)(std::get<0>(std::tuple<int>(args...)));
 	    }
             printf("rank %d -> Result calculated to be %d\n", rank, result);
 
