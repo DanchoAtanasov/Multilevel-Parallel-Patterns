@@ -76,27 +76,6 @@ struct ThreadData {
     }
 };
 
-struct Stage {
-    template<typename R, typename... Args> ThreadData<R, Args...> stage;
-
-    template<typename R, typename... Args>
-    void add(R(*func)(Args...), Args... args) {
-        stage = ;
-        stage = new ThreadData<R, Args...>();
-        stage.thread_id = rank;
-        stage.worker = func;
-        stage.args = std::tuple<Args...>(args...);
-    }
-    template<typename R, typename... Args>
-    R(*)(Args...) get() {
-        return stage;
-    }
-
-};
-
-Stage _stage;
-template<typename R, typename... Args> ThreadData<R, Args...>* stage_fnc; //TODO move this up
-
 // WorkerWrapper function that is called on separate threads,
 // calls the provided worker function with the processeed arguments
 template<typename R, typename... Args>
@@ -325,16 +304,38 @@ void Abort() {
 // Pipeline implementations
 template<typename R, typename... Args>
 void AddStage(R(*func)(Args...), Args... args) {
-    if (rank == 0) printf("rank %d -> In AddStage.\n", rank);
-    stages.push_back(func);
     if (rank == stage_counter) {
-        _stage.add(func, args...);
-        /*stage_fnc<R, Args...> = new ThreadData<R, Args...>();
-        stage_fnc<R, Args...>->thread_id = rank;
-        stage_fnc<R, Args...>->worker = func;
-        stage_fnc<R, Args...>->args = std::tuple<Args...>(args...);*/
+        printf("rank %d -> In AddStage.\n", rank);
+        int prev = (rank - 1);
+        int next = (rank + 1);
+        int input = 0;
+
+        if (rank != 0) {
+            printf("rank %d -> Waiting.\n", rank);
+            MPI_Irecv(&input, 1, MPI_INT, prev, 0, MPI_COMM_WORLD, &pipeline_reqs[0]);
+            MPI_Wait(&pipeline_reqs[0], &pipeline_stats[0]); // TODO check if this can be blocking
+            printf("rank %d -> Wait over.\n", rank);
+        }
+
+        int result = (*func)(args...);
+        printf("rank %d -> Result calculated to be %d\n", rank, result);
+
+        if (next != numTasks) MPI_Isend(&result, 1, MPI_INT, next, 0, MPI_COMM_WORLD, &pipeline_reqs[0]);
+
     }
     stage_counter++;
+    
+
+    //if (rank == 0) printf("rank %d -> In AddStage.\n", rank);
+    //stages.push_back(func);
+    //if (rank == stage_counter) {
+    //    _stage.add(func, args...);
+    //    /*stage_fnc<R, Args...> = new ThreadData<R, Args...>();
+    //    stage_fnc<R, Args...>->thread_id = rank;
+    //    stage_fnc<R, Args...>->worker = func;
+    //    stage_fnc<R, Args...>->args = std::tuple<Args...>(args...);*/
+    //}
+    //stage_counter++;
 
     //printf("rank %d -> there are %d stages now.\n", rank, stages.size());
 }
