@@ -30,7 +30,6 @@ MPI_Status stats[1];
 
 // Pipeline stuff
 std::vector<int (*)(int)> stages;
-ThreadData* stage_fnc;
 int stage_counter = 0;
 MPI_Request pipeline_reqs[2];
 MPI_Status pipeline_stats[2];
@@ -76,6 +75,7 @@ struct ThreadData {
         return func(args);
     }
 };
+template<typename R, typename... Args> ThreadData<R, Args...>* stage_fnc; //TODO move this up
 
 // WorkerWrapper function that is called on separate threads,
 // calls the provided worker function with the processeed arguments
@@ -308,10 +308,10 @@ void AddStage(R(*func)(Args...), Args... args) {
     if (rank == 0) printf("rank %d -> In AddStage.\n", rank);
     stages.push_back(func);
     if (rank == stage_counter) {
-        stage_fnc = new ThreadData<R, Args...>();
-        stage_fnc->thread_id = rank;
-        stage_fnc->worker = func;
-        stage_fnc->args = args...;
+        stage_fnc<R, Args...> = new ThreadData<R, Args...>();
+        stage_fnc<R, Args...>->thread_id = rank;
+        stage_fnc<R, Args...>->worker = func;
+        stage_fnc<R, Args...>->args = std::tuple<Args...>(args...);
     }
     stage_counter++;
 
@@ -335,7 +335,8 @@ void RunPipeline() {
             printf("rank %d -> Wait over.\n", rank);
         }
 
-        int result = stages.at(rank)(input);
+        int result = stage_fnc->run_worker(input);
+        //int result = stages.at(rank)(input);
         printf("rank %d -> Result calculated to be %d\n", rank, result);
 
         if (next != numTasks) MPI_Isend(&result, 1, MPI_INT, next, 0, MPI_COMM_WORLD, &pipeline_reqs[0]);
