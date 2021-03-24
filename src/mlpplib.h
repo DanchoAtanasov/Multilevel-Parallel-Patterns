@@ -30,6 +30,8 @@ MPI_Status stats[1];
 
 // Pipeline stuff
 std::vector<int (*)(int)> stages;
+ThreadData* stage_fnc;
+int stage_counter = 0;
 MPI_Request pipeline_reqs[2];
 MPI_Status pipeline_stats[2];
 
@@ -305,6 +307,14 @@ template<typename R, typename... Args>
 void AddStage(R(*func)(Args...), Args... args) {
     if (rank == 0) printf("rank %d -> In AddStage.\n", rank);
     stages.push_back(func);
+    if (rank == stage_counter) {
+        stage_fnc = new ThreadData<R, Args...>();
+        stage_fnc->thread_id = rank;
+        stage_fnc->worker = func;
+        stage_fnc->args = args...;
+    }
+    stage_counter++;
+
     //printf("rank %d -> there are %d stages now.\n", rank, stages.size());
 }
 

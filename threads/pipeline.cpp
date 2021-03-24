@@ -33,7 +33,7 @@ int main() {
 	AddStage(stage2, 2);
 	AddStage(stage3, 3);
 	AddStage(stage4, 4);
-	RunPipeline();
+	//RunPipeline();
 	Finish();
 	return 0;
 }
