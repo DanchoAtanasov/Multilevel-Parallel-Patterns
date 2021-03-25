@@ -3,16 +3,17 @@
 
 const int NODES = 4;
 
-int stage0(int a) {
+int* stage0(int a) {
 	printf("In stage0 with %d\n", a);
-	return a + 1;
+	int b[] = {1, 2, 3};
+	return b;
 }
 
-int stage1(int a) {
-	printf("In stage1 with %d\n", a);
+int stage1(int* a) {
+	printf("In stage1 with %d\n", a[0]);
 	int b = 0;
 	for (int i=0;i<10000000;i++) b += i;
-	return a + 2;
+	return 2;
 }
 
 float stage2(int a) {
@@ -30,7 +31,7 @@ int stage3(float a) {
 int main() {
 
 	Init();
-	SetPipelineRuns(5);
+	SetPipelineRuns(2);
 	AddStage(1, stage0, 1);
 	AddStage(1, stage1);
 	AddStage(1, stage2);
