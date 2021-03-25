@@ -30,11 +30,11 @@ int stage3(float a) {
 int main() {
 
 	Init();
-	AddStage(stage0, 5);
-	AddStage(stage1);
-	AddStage(stage2);
-	AddStage(stage3);
-	//RunPipeline();
+	SetPipelineRuns(5);
+	AddStage(1, stage0, 1);
+	AddStage(1, stage1);
+	AddStage(1, stage2);
+	AddStage(1, stage3);
 	Finish();
 	return 0;
 }
