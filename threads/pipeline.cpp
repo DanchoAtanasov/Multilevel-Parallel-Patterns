@@ -2,10 +2,10 @@
 #include "../src/mlpplib.h"
 
 const int NODES = 4;
+int b[] = { 1, 2, 3 };
 
 int* stage0(int a) {
 	printf("In stage0 with %d\n", a);
-	int b[] = {1, 2, 3};
 	return b;
 }
 
@@ -32,10 +32,10 @@ int main() {
 
 	Init();
 	SetPipelineRuns(2);
-	AddStage(1, stage0, 1);
-	AddStage(1, stage1);
-	AddStage(1, stage2);
-	AddStage(1, stage3);
+	AddStage(1, 3, stage0, 1);
+	AddStage(3, 1, stage1);
+	AddStage(1, 1, stage2);
+	AddStage(1, 1, stage3);
 	Finish();
 	return 0;
 }
