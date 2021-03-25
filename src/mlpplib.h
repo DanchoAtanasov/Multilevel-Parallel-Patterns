@@ -310,7 +310,7 @@ void SetPipelineRuns(int runs) {
 
 // Pipeline implementations
 template<typename R, typename I, typename... AArgs>
-void AddStage(int rec_count, int send_count, R(*func)(I), I args = 0) { // TODO maybe add optional args
+void AddStage(int rec_count, int send_count, R(*func)(I*), I* args = 0) { // TODO maybe add optional args
     if (rank == stage_counter) {
         printf("rank %d -> In AddStage, rec_count:%d, send_count:%d.\n", rank, rec_count, send_count);
         int prev = (rank - 1);
