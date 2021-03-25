@@ -161,6 +161,7 @@ int Farm(int num_threads, int input_len, R(*worker)(Args...), AArgs... args) {
 template <typename T>
 MPI_Datatype ResolveType() // Default function, returns the custom datatype
 {
+    if (!MPI_Custom) printf("rank %d -> Warning! You're resolving a custom datatype before setting it!\n", rank);
     return MPI_Custom;
 }
 
@@ -173,6 +174,7 @@ MPI_Datatype ResolveType<float>()
 template <>
 MPI_Datatype ResolveType<int>()
 {
+    printf("rank %d -> IN INT!!\n", rank);
     return MPI_INT;
 }
 
@@ -310,7 +312,7 @@ void SetPipelineRuns(int runs) {
 template<typename R, typename I, typename... AArgs>
 void AddStage(int rec_count, int send_count, R(*func)(I), I args = 0) { // TODO maybe add optional args
     if (rank == stage_counter) {
-        printf("rank %d -> In AddStage.\n", rank);
+        printf("rank %d -> In AddStage, rec_count:%d, send_count:%d.\n", rank, rec_count, send_count);
         int prev = (rank - 1);
         int next = (rank + 1);
         I input;
@@ -318,7 +320,7 @@ void AddStage(int rec_count, int send_count, R(*func)(I), I args = 0) { // TODO 
         //typename std::tuple_element<0, std::tuple<Args...>>::type input;
         
         // Get datatype of the first argument to know what type it's receiving
-	    MPI_Datatype data_type_rec = ResolveType<typename std::remove_all_extents<I>::type>();
+	MPI_Datatype data_type_rec = ResolveType<typename std::remove_all_extents<I>::type>();
         //MPI_Datatype data_type_rec = ResolveType<typename std::remove_all_extents<I>::type>();
 	    
         // Set datatype of what the stage is supposed to send which is derived from the return type R
@@ -327,7 +329,7 @@ void AddStage(int rec_count, int send_count, R(*func)(I), I args = 0) { // TODO 
 	    for (int i = 0; i < numRuns; i++) {
             if (rank != 0) {
                 printf("rank %d -> Waiting.\n", rank);
-                MPI_Recv(&input, rec_count, data_type_rec, prev, 0, MPI_COMM_WORLD, &pipeline_stats[0]);
+                MPI_Recv(input, rec_count, data_type_rec, prev, 0, MPI_COMM_WORLD, &pipeline_stats[0]);
                 printf("rank %d -> Wait over.\n", rank);
                 result = (*func)(input);
             }
@@ -338,7 +340,7 @@ void AddStage(int rec_count, int send_count, R(*func)(I), I args = 0) { // TODO 
 	        }
             printf("rank %d -> Result calculated to be %d\n", rank, result);
 
-            if (next != numTasks) MPI_Isend(&result, send_count, data_type_send, next, 0, MPI_COMM_WORLD, &pipeline_reqs[0]);
+            if (next != numTasks) MPI_Isend(result, send_count, data_type_send, next, 0, MPI_COMM_WORLD, &pipeline_reqs[0]);
 	    }
     }
     stage_counter++;
