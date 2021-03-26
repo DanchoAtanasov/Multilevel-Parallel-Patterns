@@ -8,6 +8,8 @@ int image[IMAGE_SIZE][IMAGE_SIZE];
 
 // Intermediate storage
 int stg1[IMAGE_SIZE][IMAGE_SIZE];
+int stg2[IMAGE_SIZE][IMAGE_SIZE];
+int stg3[IMAGE_SIZE][IMAGE_SIZE];
 int final_res[IMAGE_SIZE][IMAGE_SIZE];
 
 int stage0(int a) {
@@ -46,16 +48,42 @@ int readImage(const char* name) {
 	return 1;
 }
 
-int processImage() {
-	printf("Processing image\n");
+int addOneToImage() {
+	printf("addOneToImage\n");
 	printf("beep boop\n");
 	for (int i = 0; i < IMAGE_SIZE; i++) {
 		for (int j = 0; j < IMAGE_SIZE; j++) {
-			stg1[i][j] += 5;
+			stg1[i][j] += 1;
 			printf("%d ", stg1[i][j]);
 		}
 		printf("\n");
 	}
+	return 1;
+}
+
+int addFourToImage() {
+	printf("addFourToImage\n");
+	printf("beep boop\n");
+	for (int i = 0; i < IMAGE_SIZE; i++) {
+		for (int j = 0; j < IMAGE_SIZE; j++) {
+			stg2[i][j] += 4;
+			printf("%d ", stg2[i][j]);
+		}
+		printf("\n");
+	}
+	return 1;
+}
+
+int sumImage() {
+	printf("sumImage\n");
+	printf("beep boop\n");
+	int sum = 0
+	for (int i = 0; i < IMAGE_SIZE; i++) {
+		for (int j = 0; j < IMAGE_SIZE; j++) {
+			sum += stg3[i][j];
+		}
+	}
+	printf("sum is: %d\n", sum);
 	return 1;
 }
 
@@ -65,9 +93,11 @@ int main() {
 	Init();
 	SetPipelineRuns(1);
 	AddStage(image, IMAGE_SIZE * IMAGE_SIZE, image, readImage, "Dancho");
-	AddStage(stg1, IMAGE_SIZE * IMAGE_SIZE, final_res, processImage);
+	AddStage(stg1, IMAGE_SIZE * IMAGE_SIZE, stg2, addOneToImage);
+	AddStage(stg2, IMAGE_SIZE * IMAGE_SIZE, stg3, addFourToImage);
+	AddStage(stg3, IMAGE_SIZE * IMAGE_SIZE, final_res, sumImage);
 	//AddStage(6, IMAGE_SIZE * IMAGE_SIZE, readImage, "Dancho");
-	//AddStage(IMAGE_SIZE * IMAGE_SIZE, 1, processImage);
+	//AddStage(IMAGE_SIZE * IMAGE_SIZE, 1, addOneToImage);
 	//AddStage(1, 1, stage0, 1);
 	//AddStage(1, 1, stage1);
 	//AddStage(1, 1, stage2);
