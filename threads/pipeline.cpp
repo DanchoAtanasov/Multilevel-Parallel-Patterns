@@ -4,7 +4,8 @@
 const int NODES = 4;
 
 const int IMAGE_SIZE = 10;
-int image[IMAGE_SIZE][IMAGE_SIZE];
+int image[IMAGE_SIZE];
+//int image[IMAGE_SIZE][IMAGE_SIZE];
 
 //int b[] = { 1, 2, 3 };
 //int c[] = { 1 };
@@ -33,12 +34,13 @@ int stage3(float a) {
 	return int(a) + 4;
 }
 
-int** readImage(char* name) {
+int* readImage(char* name) {
 	printf("Mock reading image with name %s\n", name);
 	for (int i = 0; i < IMAGE_SIZE; i++) {
-		for (int j = 0; j < IMAGE_SIZE; j++) {
-			image[i][j] = i * IMAGE_SIZE + j;
-		}
+		//for (int j = 0; j < IMAGE_SIZE; j++) {
+		image[i] = i;
+			//image[i][j] = i * IMAGE_SIZE + j;
+		//}
 	}
 
 	return image;
@@ -55,8 +57,10 @@ int main() {
 
 	Init();
 	SetPipelineRuns(1);
-	AddStage(6, IMAGE_SIZE * IMAGE_SIZE, readImage, "Dancho");
-	AddStage(IMAGE_SIZE * IMAGE_SIZE, 1, processImage);
+	AddStage(6, IMAGE_SIZE, readImage, "Dancho");
+	AddStage(IMAGE_SIZE, 1, processImage);
+	//AddStage(6, IMAGE_SIZE * IMAGE_SIZE, readImage, "Dancho");
+	//AddStage(IMAGE_SIZE * IMAGE_SIZE, 1, processImage);
 	//AddStage(1, 1, stage0, 1);
 	//AddStage(1, 1, stage1);
 	//AddStage(1, 1, stage2);
