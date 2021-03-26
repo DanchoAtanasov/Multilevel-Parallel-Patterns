@@ -34,14 +34,16 @@ int stage3(float a) {
 	return int(a) + 4;
 }
 
-int readImage(char* name) {
+int readImage(const char* name) {
 	printf("Mock reading image with name %s\n", name);
 	for (int i = 0; i < IMAGE_SIZE; i++) {
 		for (int j = 0; j < IMAGE_SIZE; j++) {
 			image[i][j] = i * IMAGE_SIZE + j;
+			printf("%d ", image[i][j]);
 		}
+		printf("\n");
 	}
-	return 1
+	return 1;
 }
 
 int processImage() {
@@ -50,7 +52,9 @@ int processImage() {
 	for (int i = 0; i < IMAGE_SIZE; i++) {
 		for (int j = 0; j < IMAGE_SIZE; j++) {
 			stg1[i][j] += 5;
+			printf("%d ", stg1[i][j]);
 		}
+		printf("\n");
 	}
 	return 1;
 }
@@ -60,7 +64,7 @@ int main() {
 
 	Init();
 	SetPipelineRuns(1);
-	AddStage(image, IMAGE_SIZE * IMAGE_SIZE, stg1, readImage, "Dancho");
+	AddStage(image, IMAGE_SIZE * IMAGE_SIZE, image, readImage, "Dancho");
 	AddStage(stg1, IMAGE_SIZE * IMAGE_SIZE, final_res, processImage);
 	//AddStage(6, IMAGE_SIZE * IMAGE_SIZE, readImage, "Dancho");
 	//AddStage(IMAGE_SIZE * IMAGE_SIZE, 1, processImage);

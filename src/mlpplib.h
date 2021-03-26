@@ -317,6 +317,7 @@ void AddStage(T* in, int count, T* out, R(*func)(Args...), Args... args) { // TO
         int next = (rank + 1);
         //I input;
         //R result;
+	int result;
         //typename std::tuple_element<0, std::tuple<Args...>>::type input;
         
         // Get datatype of the first argument to know what type it's receiving
@@ -330,20 +331,24 @@ void AddStage(T* in, int count, T* out, R(*func)(Args...), Args... args) { // TO
             if (rank != 0) {
                 printf("rank %d -> Waiting.\n", rank);
                 MPI_Recv(in, count, data_type_rec, prev, 0, MPI_COMM_WORLD, &pipeline_stats[0]);
-                //MPI_Recv(input, rec_count, data_type_rec, prev, 0, MPI_COMM_WORLD, &pipeline_stats[0]);
                 printf("rank %d -> Wait over.\n", rank);
-                result = (*func)(args);
+		//MPI_Recv(input, rec_count, data_type_rec, prev, 0, MPI_COMM_WORLD, &pipeline_stats[0]);
+                printf("rank %d -> in[0][0]:%d.\n", rank, in[0][0]);
+                result = (*func)(args...);
             }
             else {
 	            //printf("args[0]:%d\n", std::get<0>(std::tuple<int>(args...)));
-                result = (*func)(args);
+                result = (*func)(args...);
                 //result = (*func)(std::get<0>(std::tuple<int>(args...)));
 	        }
             printf("rank %d -> Result calculated to be %d\n", rank, result);
 
             //if (next != numTasks) MPI_Isend(result, send_count, data_type_send, next, 0, MPI_COMM_WORLD, &pipeline_reqs[0]);
-            if (next != numTasks) MPI_Isend(out, count, data_type_rec, next, 0, MPI_COMM_WORLD, &pipeline_reqs[0]);
-            else MPI_Isend(out, count, data_type_rec, 0, 0, MPI_COMM_WORLD, &pipeline_reqs[0]);
+            if (next != numTasks) {
+                printf("rank %d -> Sending out[0][0]:%d to:%d\n", rank, out[0][0], next);
+		MPI_Isend(out, count, data_type_rec, next, 0, MPI_COMM_WORLD, &pipeline_reqs[0]);
+	    }
+	    else MPI_Isend(out, count, data_type_rec, 0, 0, MPI_COMM_WORLD, &pipeline_reqs[0]);
 	    }
     }
     stage_counter++;
