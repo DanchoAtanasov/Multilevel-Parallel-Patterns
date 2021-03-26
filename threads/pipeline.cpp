@@ -34,24 +34,25 @@ int stage3(float a) {
 	return int(a) + 4;
 }
 
-void readImage(char* name) {
+int readImage(char* name) {
 	printf("Mock reading image with name %s\n", name);
 	for (int i = 0; i < IMAGE_SIZE; i++) {
 		for (int j = 0; j < IMAGE_SIZE; j++) {
 			image[i][j] = i * IMAGE_SIZE + j;
 		}
 	}
-	//return 1
+	return 1
 }
 
-void processImage() {
+int processImage() {
 	printf("Processing image\n");
 	printf("beep boop\n");
 	for (int i = 0; i < IMAGE_SIZE; i++) {
 		for (int j = 0; j < IMAGE_SIZE; j++) {
-			stg[i][j] += 5;
+			stg1[i][j] += 5;
 		}
 	}
+	return 1;
 }
 
 
