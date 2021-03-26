@@ -316,13 +316,11 @@ void AddStage(I* in, int in_count, O* out, int out_count, R(*func)(Args...), Arg
         int next = (rank + 1);
         if (next == numTasks) next = 0;
         int result;
-        //typename std::tuple_element<0, std::tuple<Args...>>::type input;
 
-        // Get datatype of the first argument to know what type it's receiving
+        // Get datatype for the receive
         MPI_Datatype data_type_rec = ResolveType<typename std::remove_all_extents<I>::type>();
-        //MPI_Datatype data_type_rec = ResolveType<typename std::remove_all_extents<I>::type>();
-
-        // Set datatype of what the stage is supposed to send which is derived from the return type R
+        
+        // Get datatype for the send
         MPI_Datatype data_type_send = ResolveType<typename std::remove_all_extents<O>::type>();
 
         for (int i = 0; i < numRuns; i++) {
@@ -330,32 +328,15 @@ void AddStage(I* in, int in_count, O* out, int out_count, R(*func)(Args...), Arg
                 printf("rank %d -> Waiting.\n", rank);
                 MPI_Recv(in, in_count, data_type_rec, prev, 0, MPI_COMM_WORLD, &pipeline_stats[0]);
                 printf("rank %d -> Wait over.\n", rank);
-                //MPI_Recv(input, rec_count, data_type_rec, prev, 0, MPI_COMM_WORLD, &pipeline_stats[0]);
-                //result = (*func)(args...);
             }
-            //else {
-            //    //printf("args[0]:%d\n", std::get<0>(std::tuple<int>(args...)));
-            //    result = (*func)(args...);
-            //    //result = (*func)(std::get<0>(std::tuple<int>(args...)));
-            //}
 
-            result = (*func)(args...);
+            result = (*func)(args...); // TODO call Farm pattern here
             //printf("rank %d -> Result calculated to be %d\n", rank, result);
 
             MPI_Isend(out, out_count, data_type_send, next, 0, MPI_COMM_WORLD, &pipeline_reqs[0]);
-
-            /*
-            //if (next != numTasks) MPI_Isend(result, send_count, data_type_send, next, 0, MPI_COMM_WORLD, &pipeline_reqs[0]);
-            if (next != numTasks) {
-                printf("rank %d -> Sending out[0][0]:%d to:%d\n", rank, out[0][0], next);
-                MPI_Isend(out, out_count, data_type_rec, next, 0, MPI_COMM_WORLD, &pipeline_reqs[0]);
-            }
-            else {
-                MPI_Isend(out, out_count, data_type_rec, 0, 0, MPI_COMM_WORLD, &pipeline_reqs[0]);
-            }*/
         }
 
-        // Wait to get the final result
+        // Wait to get the final result // TODO currently it's taking only 1 / numRuns back
         if (rank == 0) {
             printf("rank %d -> Waiting.\n", rank);
             MPI_Recv(in, in_count, data_type_rec, prev, 0, MPI_COMM_WORLD, &pipeline_stats[0]);
@@ -365,72 +346,5 @@ void AddStage(I* in, int in_count, O* out, int out_count, R(*func)(Args...), Arg
     stage_counter++;
 }
 
- //Backup of AddStage
-//template<typename R, typename... Args, typename... AArgs>
-//void AddStage(int count, R(*func)(Args...), AArgs... args) { // TODO maybe add optional args
-//    if (rank == stage_counter) {
-//        printf("rank %d -> In AddStage.\n", rank);
-//        int prev = (rank - 1);
-//        int next = (rank + 1);
-//        R result;
-//        typename std::tuple_element<0, std::tuple<Args...>>::type input;
-//
-//        // Get datatype of the first argument to know what type it's receiving
-//        MPI_Datatype data_type_rec = ResolveType<typename std::remove_all_extents<
-//            typename std::tuple_element<0, std::tuple<Args...>>::type>::type>();
-//        //MPI_Datatype data_type_rec = ResolveType<typename std::remove_all_extents<I>::type>();
-//
-//        // Set datatype of what the stage is supposed to send which is derived from the return type R
-//        MPI_Datatype data_type_send = ResolveType<typename std::remove_all_extents<R>::type>();
-//
-//        for (int i = 0; i < numRuns; i++) {
-//            if (rank != 0) {
-//                printf("rank %d -> Waiting.\n", rank);
-//                MPI_Recv(&input, 1, data_type_rec, prev, 0, MPI_COMM_WORLD, &pipeline_stats[0]);
-//                printf("rank %d -> Wait over.\n", rank);
-//                result = (*func)(input);
-//            }
-//            else {
-//                //printf("args[0]:%d\n", std::get<0>(std::tuple<int>(args...)));
-//                result = (*func)(std::get<0>(std::tuple<int>(args...)));
-//            }
-//            printf("rank %d -> Result calculated to be %d\n", rank, result);
-//
-//            if (next != numTasks) MPI_Isend(&result, 1, data_type_send, next, 0, MPI_COMM_WORLD, &pipeline_reqs[0]);
-//        }
-//    }
-//    stage_counter++;
-//}
-// End of backup
-
-//void RunPipeline() {
-//    printf("rank %d -> In RunPipeline.\n", rank);
-//    int prev = (rank - 1);// % numTasks;
-//    int next = (rank + 1);// % numTasks;
-//    //printf("rank %d -> prev %d next %d.\n", rank, prev, next);
-//
-//    int input = 0;
-//
-//    for (int i = 0; i < numRuns; i++) {
-//        printf("rank %d -> In loop %d.\n", rank, i);
-//        if (rank != 0) {
-//            printf("rank %d -> Waiting.\n", rank);
-//            MPI_Irecv(&input, 1, MPI_INT, prev, 0, MPI_COMM_WORLD, &pipeline_reqs[0]);
-//            MPI_Wait(&pipeline_reqs[0], &pipeline_stats[0]); // TODO check if this can be blocking
-//            printf("rank %d -> Wait over.\n", rank);
-//        }
-//
-//        int result = 0; 
-//        //int result = _stage.get();
-//        //int result = stage_fnc->run_worker(input);
-//        //int result = stages.at(rank)(input);
-//        printf("rank %d -> Result calculated to be %d\n", rank, result);
-//
-//        if (next != numTasks) MPI_Isend(&result, 1, MPI_INT, next, 0, MPI_COMM_WORLD, &pipeline_reqs[0]);
-//
-//    }
-//
-//    
-//}
-
+ 
 #endif  // _MLPPLIB_H_
