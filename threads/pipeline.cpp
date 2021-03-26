@@ -77,7 +77,7 @@ int addFourToImage() {
 int sumImage() {
 	printf("sumImage\n");
 	printf("beep boop\n");
-	int sum = 0
+	int sum = 0;
 	for (int i = 0; i < IMAGE_SIZE; i++) {
 		for (int j = 0; j < IMAGE_SIZE; j++) {
 			sum += stg3[i][j];
@@ -91,10 +91,10 @@ int sumImage() {
 int main() {
 
 	Init();
-	SetPipelineRuns(1);
+	SetPipelineRuns(2);
 	AddStage(image, IMAGE_SIZE * IMAGE_SIZE, image, readImage, "Dancho");
-	AddStage(stg1, IMAGE_SIZE * IMAGE_SIZE, stg2, addOneToImage);
-	AddStage(stg2, IMAGE_SIZE * IMAGE_SIZE, stg3, addFourToImage);
+	AddStage(stg1, IMAGE_SIZE * IMAGE_SIZE, stg1, addOneToImage);
+	AddStage(stg2, IMAGE_SIZE * IMAGE_SIZE, stg2, addFourToImage);
 	AddStage(stg3, IMAGE_SIZE * IMAGE_SIZE, final_res, sumImage);
 	//AddStage(6, IMAGE_SIZE * IMAGE_SIZE, readImage, "Dancho");
 	//AddStage(IMAGE_SIZE * IMAGE_SIZE, 1, addOneToImage);
