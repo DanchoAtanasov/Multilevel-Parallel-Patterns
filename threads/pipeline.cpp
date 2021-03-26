@@ -11,6 +11,7 @@ int stg1[IMAGE_SIZE][IMAGE_SIZE];
 int stg2[IMAGE_SIZE][IMAGE_SIZE];
 int stg3[IMAGE_SIZE][IMAGE_SIZE];
 int final_res[IMAGE_SIZE][IMAGE_SIZE];
+int final_sum;
 
 int stage0(int a) {
 	printf("In stage0 with %d\n", a);
@@ -77,13 +78,12 @@ int addFourToImage() {
 int sumImage() {
 	printf("sumImage\n");
 	printf("beep boop\n");
-	int sum = 0;
 	for (int i = 0; i < IMAGE_SIZE; i++) {
 		for (int j = 0; j < IMAGE_SIZE; j++) {
-			sum += stg3[i][j];
+			final_sum += stg3[i][j];
 		}
 	}
-	printf("sum is: %d\n", sum);
+	printf("sum is: %d\n", final_sum);
 	return 1;
 }
 
@@ -92,10 +92,10 @@ int main() {
 
 	Init();
 	SetPipelineRuns(2);
-	AddStage(image, IMAGE_SIZE * IMAGE_SIZE, image, readImage, "Dancho");
-	AddStage(stg1, IMAGE_SIZE * IMAGE_SIZE, stg1, addOneToImage);
-	AddStage(stg2, IMAGE_SIZE * IMAGE_SIZE, stg2, addFourToImage);
-	AddStage(stg3, IMAGE_SIZE * IMAGE_SIZE, final_res, sumImage);
+	AddStage(final_sum, 1, image, IMAGE_SIZE * IMAGE_SIZE, readImage, "Dancho");
+	AddStage(stg1, IMAGE_SIZE * IMAGE_SIZE, stg1, IMAGE_SIZE * IMAGE_SIZE, addOneToImage);
+	AddStage(stg2, IMAGE_SIZE * IMAGE_SIZE, stg2, IMAGE_SIZE * IMAGE_SIZE, addFourToImage);
+	AddStage(stg3, IMAGE_SIZE * IMAGE_SIZE, final_sum, 1, sumImage);
 	//AddStage(6, IMAGE_SIZE * IMAGE_SIZE, readImage, "Dancho");
 	//AddStage(IMAGE_SIZE * IMAGE_SIZE, 1, addOneToImage);
 	//AddStage(1, 1, stage0, 1);
@@ -103,12 +103,12 @@ int main() {
 	//AddStage(1, 1, stage2);
 	//AddStage(1, 1, stage3);
 	Finish();
-	for (int i = 0; i < IMAGE_SIZE; i++) {
+	/*for (int i = 0; i < IMAGE_SIZE; i++) {
 		for (int j = 0; j < IMAGE_SIZE; j++) {
 			printf("%d", final_res[i][j]);
 		}
 		printf("\n");
-	}
+	}*/
 
 	return 0;
 }

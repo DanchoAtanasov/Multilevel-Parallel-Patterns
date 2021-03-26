@@ -309,50 +309,64 @@ void SetPipelineRuns(int runs) {
 }
 
 // Pipeline implementations
-template<typename T, typename R, typename... Args, typename... AArgs>
-void AddStage(T* in, int count, T* out, R(*func)(Args...), Args... args) { // TODO maybe add optional args
+template<typename I, typename O, typename R, typename... Args, typename... AArgs>
+void AddStage(I* in, int in_count, O* out, int out_count, R(*func)(Args...), Args... args) { // TODO maybe add optional args
     if (rank == stage_counter) {
         printf("rank %d -> In AddStage, count:%d.\n", rank, count);
         int prev = (rank - 1);
         int next = (rank + 1);
-        //I input;
-        //R result;
-	int result;
+        if (next == numTasks) next = 0;
+        int result;
         //typename std::tuple_element<0, std::tuple<Args...>>::type input;
-        
+
         // Get datatype of the first argument to know what type it's receiving
-	    MPI_Datatype data_type_rec = ResolveType<typename std::remove_all_extents<T>::type>();
+        MPI_Datatype data_type_rec = ResolveType<typename std::remove_all_extents<I>::type>();
         //MPI_Datatype data_type_rec = ResolveType<typename std::remove_all_extents<I>::type>();
-	    
+
         // Set datatype of what the stage is supposed to send which is derived from the return type R
-        //MPI_Datatype data_type_send = ResolveType<typename std::remove_all_extents<R>::type>();
-	    
-	    for (int i = 0; i < numRuns; i++) {
+        MPI_Datatype data_type_send = ResolveType<typename std::remove_all_extents<O>::type>();
+
+        for (int i = 0; i < numRuns; i++) {
             if (rank != 0) {
                 printf("rank %d -> Waiting.\n", rank);
-                MPI_Recv(in, count, data_type_rec, prev, 0, MPI_COMM_WORLD, &pipeline_stats[0]);
+                MPI_Recv(in, in_count, data_type_rec, prev, 0, MPI_COMM_WORLD, &pipeline_stats[0]);
                 printf("rank %d -> Wait over.\n", rank);
-		//MPI_Recv(input, rec_count, data_type_rec, prev, 0, MPI_COMM_WORLD, &pipeline_stats[0]);
+                //MPI_Recv(input, rec_count, data_type_rec, prev, 0, MPI_COMM_WORLD, &pipeline_stats[0]);
                 printf("rank %d -> in[0][0]:%d.\n", rank, in[0][0]);
-                result = (*func)(args...);
+                //result = (*func)(args...);
             }
-            else {
-	            //printf("args[0]:%d\n", std::get<0>(std::tuple<int>(args...)));
-                result = (*func)(args...);
-                //result = (*func)(std::get<0>(std::tuple<int>(args...)));
-	        }
+            //else {
+            //    //printf("args[0]:%d\n", std::get<0>(std::tuple<int>(args...)));
+            //    result = (*func)(args...);
+            //    //result = (*func)(std::get<0>(std::tuple<int>(args...)));
+            //}
+
+            result = (*func)(args...);
             printf("rank %d -> Result calculated to be %d\n", rank, result);
 
+            MPI_Isend(out, out_count, data_type_send, next, 0, MPI_COMM_WORLD, &pipeline_reqs[0]);
+
+            /*
             //if (next != numTasks) MPI_Isend(result, send_count, data_type_send, next, 0, MPI_COMM_WORLD, &pipeline_reqs[0]);
             if (next != numTasks) {
                 printf("rank %d -> Sending out[0][0]:%d to:%d\n", rank, out[0][0], next);
-		MPI_Isend(out, count, data_type_rec, next, 0, MPI_COMM_WORLD, &pipeline_reqs[0]);
-	    }
-	    else MPI_Isend(out, count, data_type_rec, 0, 0, MPI_COMM_WORLD, &pipeline_reqs[0]);
-	    }
+                MPI_Isend(out, out_count, data_type_rec, next, 0, MPI_COMM_WORLD, &pipeline_reqs[0]);
+            }
+            else {
+                MPI_Isend(out, out_count, data_type_rec, 0, 0, MPI_COMM_WORLD, &pipeline_reqs[0]);
+            }*/
+        }
+
+        // Wait to get the final result
+        if (rank == 0) {
+            printf("rank %d -> Waiting.\n", rank);
+            MPI_Recv(in, in_count, data_type_rec, prev, 0, MPI_COMM_WORLD, &pipeline_stats[0]);
+            printf("rank %d -> Wait over.\n", rank);
+        }
     }
     stage_counter++;
 }
+
  //Backup of AddStage
 //template<typename R, typename... Args, typename... AArgs>
 //void AddStage(int count, R(*func)(Args...), AArgs... args) { // TODO maybe add optional args
