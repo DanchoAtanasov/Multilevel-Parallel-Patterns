@@ -174,7 +174,6 @@ MPI_Datatype ResolveType<float>()
 template <>
 MPI_Datatype ResolveType<int>()
 {
-    printf("rank %d -> IN INT!!\n", rank);
     return MPI_INT;
 }
 
@@ -312,7 +311,7 @@ void SetPipelineRuns(int runs) {
 template<typename I, typename O, typename R, typename... Args, typename... AArgs>
 void AddStage(I* in, int in_count, O* out, int out_count, R(*func)(Args...), Args... args) { // TODO maybe add optional args
     if (rank == stage_counter) {
-        printf("rank %d -> In AddStage, count:%d.\n", rank, count);
+        printf("rank %d -> In AddStage, in_count:%d out_count:%d.\n", rank, in_count, out_count);
         int prev = (rank - 1);
         int next = (rank + 1);
         if (next == numTasks) next = 0;
@@ -332,7 +331,6 @@ void AddStage(I* in, int in_count, O* out, int out_count, R(*func)(Args...), Arg
                 MPI_Recv(in, in_count, data_type_rec, prev, 0, MPI_COMM_WORLD, &pipeline_stats[0]);
                 printf("rank %d -> Wait over.\n", rank);
                 //MPI_Recv(input, rec_count, data_type_rec, prev, 0, MPI_COMM_WORLD, &pipeline_stats[0]);
-                printf("rank %d -> in[0][0]:%d.\n", rank, in[0][0]);
                 //result = (*func)(args...);
             }
             //else {
@@ -342,7 +340,7 @@ void AddStage(I* in, int in_count, O* out, int out_count, R(*func)(Args...), Arg
             //}
 
             result = (*func)(args...);
-            printf("rank %d -> Result calculated to be %d\n", rank, result);
+            //printf("rank %d -> Result calculated to be %d\n", rank, result);
 
             MPI_Isend(out, out_count, data_type_send, next, 0, MPI_COMM_WORLD, &pipeline_reqs[0]);
 
