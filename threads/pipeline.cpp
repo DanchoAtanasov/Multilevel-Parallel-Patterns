@@ -17,7 +17,7 @@ int stg3[IMAGE_SIZE][IMAGE_SIZE];
 int final_sum;
 
 
-int readImage(char** filenames) {
+int readImage(int start, int end, char** filenames) {
 	char* name = filenames[file_idx];
 	file_idx++;
 	printf("Mock reading image with name %s\n", name);
@@ -32,7 +32,7 @@ int readImage(char** filenames) {
 	return 1;
 }
 
-int addOneToImage() {
+int addOneToImage(int start, int end) {
 	printf("addOneToImage\n");
 	for (int i = 0; i < IMAGE_SIZE; i++) {
 		for (int j = 0; j < IMAGE_SIZE; j++) {
@@ -44,7 +44,7 @@ int addOneToImage() {
 	return 1;
 }
 
-int addFourToImage() {
+int addFourToImage(int start, int end) {
 	printf("addFourToImage\n");
 	for (int i = 0; i < IMAGE_SIZE; i++) {
 		for (int j = 0; j < IMAGE_SIZE; j++) {
@@ -57,7 +57,7 @@ int addFourToImage() {
 	return 1;
 }
 
-int sumImage() {
+int sumImage(int start, int end) {
 	printf("sumImage\n");
 	for (int i = 0; i < IMAGE_SIZE; i++) {
 		for (int j = 0; j < IMAGE_SIZE; j++) {
