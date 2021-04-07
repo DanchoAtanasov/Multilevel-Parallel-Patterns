@@ -330,7 +330,8 @@ void AddStage(I* in, int in_count, O* out, int out_count, R(*func)(Args...), Arg
                 printf("rank %d -> Wait over.\n", rank);
             }
 
-            result = (*func)(args...); // TODO call Farm pattern here
+            //result = (*func)(args...); // TODO call Farm pattern here
+            result = Farm(2, in_count, (*func), (args...));
             //printf("rank %d -> Result calculated to be %d\n", rank, result);
 
             MPI_Isend(out, out_count, data_type_send, next, 0, MPI_COMM_WORLD, &pipeline_reqs[0]);
