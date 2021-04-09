@@ -309,13 +309,16 @@ void SetPipelineRuns(int runs) {
 
 // Pipeline implementations
 template<typename I, typename O, typename R, typename... Args, typename... AArgs>
-void AddStage(I* in, int in_count, O* out, int out_count, R(*func)(Args...), Args... args) { // TODO maybe add optional args
+void AddStage(int num_threads, int input_len, I* in, int in_count, O* out, int out_count, R(*func)(Args...), AArgs... args) { // TODO maybe add optional args
     if (rank == stage_counter) {
         printf("rank %d -> In AddStage, in_count:%d out_count:%d.\n", rank, in_count, out_count);
         int prev = (rank - 1);
         int next = (rank + 1);
         if (next == numTasks) next = 0;
         int result;
+
+	// THIS is a quick fix, remove it
+	numTasks = 1;
 
         // Get datatype for the receive
         MPI_Datatype data_type_rec = ResolveType<typename std::remove_all_extents<I>::type>();
@@ -331,7 +334,8 @@ void AddStage(I* in, int in_count, O* out, int out_count, R(*func)(Args...), Arg
             }
 
             //result = (*func)(args...); // TODO call Farm pattern here
-            result = Farm(2, in_count, *func, args...);
+            //result = Farm(2, out_count, *func, args...);
+            result = Farm(num_threads, input_len, *func, args...);
             //printf("rank %d -> Result calculated to be %d\n", rank, result);
 
             MPI_Isend(out, out_count, data_type_send, next, 0, MPI_COMM_WORLD, &pipeline_reqs[0]);
