@@ -89,18 +89,18 @@ template<typename R, typename... Args>
 void* WorkerWrapper(void* threadarg) {
     ThreadData<R, Args...>* my_data = (ThreadData<R, Args...>*) threadarg;
     int tid = my_data->thread_id;
-    printf("rank %d -> Working thread: %d\n", rank, tid);
+    //printf("rank %d -> Working thread: %d\n", rank, tid);
 
     R res = my_data->run_worker();
 
-    printf("rank %d -> Thread %ld done with res: %d.\n", rank, tid, res);
+    //printf("rank %d -> Thread %ld done with res: %d.\n", rank, tid, res);
     pthread_exit(NULL);
 }
 
 // Farm function that calls 'worker' function on 'input_array' with length 'input_len'
 template<typename R, typename... Args, typename... AArgs>
 int Farm(int num_threads, int input_len, R(*worker)(Args...), AArgs... args) {
-    printf("rank %d -> In Farm with num args: %d\n", rank, sizeof...(AArgs));
+    //printf("rank %d -> In Farm with num args: %d\n", rank, sizeof...(AArgs));
     //printf("num_threads: %d, input_len: %d\n", num_threads, input_len);
 
     //int * result = (int*)malloc(input_len * sizeof(int));
@@ -129,7 +129,7 @@ int Farm(int num_threads, int input_len, R(*worker)(Args...), AArgs... args) {
         int start = t * batch_size;
         int end = (t + 1) * batch_size;
         if (t == num_threads - 1) end = input_len / numTasks + input_len % numTasks; // add remainder
-        printf("rank %d -> new thread with t:%d, start:%d, end:%d\n", rank, t, start, end);
+        //printf("rank %d -> new thread with t:%d, start:%d, end:%d\n", rank, t, start, end);
         
         // Set values in thread_data_array to be passed to the corresponding threads
         thread_data_array[t].thread_id = t;
@@ -151,7 +151,7 @@ int Farm(int num_threads, int input_len, R(*worker)(Args...), AArgs... args) {
             printf("ERROR; return code from pthread_join() is %d\n", return_code);
             exit(-1);
         }
-        printf("rank %d -> Completed join with thread %ld\n", rank, t);
+        //printf("rank %d -> Completed join with thread %ld\n", rank, t);
     }
 
     // Last thing that main() should do
@@ -231,7 +231,7 @@ void access(C& cls, T C::* member, Mems... rest) {
 
 template <typename T, typename... Members>
 void MakeCustomDatatype(T* a, Members... mems) {
-    printf("rank %d -> In MakeCustomDatatype\n", rank);
+    //printf("rank %d -> In MakeCustomDatatype\n", rank);
     access(*a, mems...);
 
     // Creating the datatype
@@ -251,16 +251,16 @@ void Init() {
 template<typename R, typename... Args>
 void Load(R (*func)(Args...), Args... args) {  // TODO make this work for no arguments
     if (rank == 0) {
-        printf("rank %d -> In load\n", rank);
+        //printf("rank %d -> In load\n", rank);
         (*func)(args...);
     }
 }
 
 template <typename T>
 void Scatter(T* send_buffer, int count, T* receive_buffer) {
-    printf("rank %d -> In Scatter\n", rank);
+    //printf("rank %d -> In Scatter\n", rank);
     const int kChunkSize = count / numTasks;
-    printf("rank %d -> kChunkSize:%d\n", rank, kChunkSize);
+    //printf("rank %d -> kChunkSize:%d\n", rank, kChunkSize);
 
     MPI_Datatype data_type = ResolveType<typename std::remove_all_extents<T>::type>();
 
@@ -270,7 +270,7 @@ void Scatter(T* send_buffer, int count, T* receive_buffer) {
 
 template <typename T>
 void Broadcast(T* send_buffer, int count) {
-    printf("rank %d -> In Broadcast\n", rank);
+    //printf("rank %d -> In Broadcast\n", rank);
 
     MPI_Datatype data_type = ResolveType<typename std::remove_all_extents<T>::type>();
 
@@ -279,7 +279,7 @@ void Broadcast(T* send_buffer, int count) {
 
 template <typename T>
 void Gather(T* send_buffer, int count, T* receive_buffer) {
-    printf("rank %d -> In Gather\n", rank);
+    //printf("rank %d -> In Gather\n", rank);
     const int kChunkSize = count / numTasks;
 
     MPI_Datatype data_type = ResolveType<typename std::remove_all_extents<T>::type>();
@@ -290,22 +290,22 @@ void Gather(T* send_buffer, int count, T* receive_buffer) {
 
     if (rank == 0) {
         MPI_Wait(&reqs[0], &stats[0]);
-        printf("rank %d -> Finished gathering\n", rank);
+        //printf("rank %d -> Finished gathering\n", rank);
     }
 }
 
 void Finish() {
-    printf("rank %d -> Finished exectuion.\n", rank);
+    //printf("rank %d -> Finished exectuion.\n", rank);
     MPI_Finalize();
     
     if (rank != 0) {
-        printf("rank %d -> Exiting not-main process\n", rank);
+        //printf("rank %d -> Exiting not-main process\n", rank);
         exit(0);
     }
 }
 
 void Abort() {
-    printf("rank %d -> Aborting.\n", rank);
+    //printf("rank %d -> Aborting.\n", rank);
     MPI_Abort(MPI_COMM_WORLD, 1);
 }
 
@@ -317,7 +317,7 @@ void SetPipelineRuns(int runs) {
 template<typename I, typename O, typename R, typename... Args, typename... AArgs>
 void AddStage(int num_threads, int input_len, I* in, int in_count, O* out, int out_count, R(*func)(Args...), AArgs... args) { // TODO maybe add optional args
     if (rank == stage_counter) {
-        printf("rank %d -> In AddStage, in_count:%d out_count:%d.\n", rank, in_count, out_count);
+        //printf("rank %d -> In AddStage, in_count:%d out_count:%d.\n", rank, in_count, out_count);
         int prev = (rank - 1);
         int next = (rank + 1);
         if (next == numTasks) next = 0;
@@ -334,9 +334,9 @@ void AddStage(int num_threads, int input_len, I* in, int in_count, O* out, int o
 
         for (int i = 0; i < numRuns; i++) {
             if (rank != 0) {
-                printf("rank %d -> Waiting.\n", rank);
+                //printf("rank %d -> Waiting.\n", rank);
                 MPI_Recv(in, in_count, data_type_rec, prev, 0, MPI_COMM_WORLD, &pipeline_stats[0]);
-                printf("rank %d -> Wait over.\n", rank);
+                //printf("rank %d -> Wait over.\n", rank);
             }
 
             //result = (*func)(args...); // TODO call Farm pattern here
@@ -347,9 +347,9 @@ void AddStage(int num_threads, int input_len, I* in, int in_count, O* out, int o
 
         // Wait to get the final result // TODO currently it's taking only 1 / numRuns back
         if (rank == 0) {
-            printf("rank %d -> Waiting.\n", rank);
+            //printf("rank %d -> Waiting.\n", rank);
             MPI_Recv(in, in_count, data_type_rec, prev, 0, MPI_COMM_WORLD, &pipeline_stats[0]);
-            printf("rank %d -> Wait over.\n", rank);
+            //printf("rank %d -> Wait over.\n", rank);
         }
         // TODO Maybe add a Finish here to end other nodes
     }
