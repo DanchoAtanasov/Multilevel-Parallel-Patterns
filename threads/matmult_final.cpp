@@ -1,7 +1,7 @@
 #include <iostream>
 #include "../src/mlpplib.h"
 
-const int MATRIX_SIZE = 1024;
+const int MATRIX_SIZE = 2048;
 const int NODES = 4;
 
 float matrix1[MATRIX_SIZE][MATRIX_SIZE];
