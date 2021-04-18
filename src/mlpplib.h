@@ -2,7 +2,7 @@
 #ifndef _MLPPLIB_H_
 #define _MLPPLIB_H_
 
-//#include <iostream>
+// Includes
 #include <pthread.h>
 #include <tuple>
 #include "mpi.h"
@@ -28,12 +28,13 @@ MPI_Datatype MPI_Custom;
 MPI_Request reqs[1];
 MPI_Status stats[1];
 
-// Pipeline stuff
-std::vector<int (*)(int)> stages;
+// Pipeline pattern variables
+//std::vector<int (*)(int)> stages;
 int stage_counter = 0;
-MPI_Request pipeline_reqs[2];
-MPI_Status pipeline_stats[2];
 int numRuns = 0;
+MPI_Request pipeline_reqs[1];
+MPI_Status pipeline_stats[1];
+
 
 // pthread prototypes
 template<typename R, typename... Args, typename... AArgs>
@@ -51,6 +52,11 @@ template <typename T>
 void Gather(T* send_buffer, int count, T* receive_buffer);
 void Finish();
 void Abort();
+
+// Pipeline prototypes
+template<typename I, typename O, typename R, typename... Args, typename... AArgs>
+void AddStage(int num_threads, int input_len, I* in, int in_count, O* out, int out_count, R(*func)(Args...), AArgs... args);
+void SetPipelineRuns(int runs);
 
 // pthread implementations
 template<typename R, typename... Args>
@@ -212,7 +218,7 @@ template <typename C, typename T>
 void access(C& cls, T C::* member) {
     //printf("rank %d -> In smallest access, member: %d\n", rank, cls.*member);
     _type.push_back(ResolveType<typename std::remove_all_extents<T>::type>());
-    _blocklen.push_back(1);
+    _blocklen.push_back(1);  // TODO add support for arrays as field variables
     _disp.push_back(offsetOf(member));
 }
 
@@ -317,8 +323,8 @@ void AddStage(int num_threads, int input_len, I* in, int in_count, O* out, int o
         if (next == numTasks) next = 0;
         int result;
 
-	// THIS is a quick fix, remove it
-	numTasks = 1;
+	    // THIS is a quick fix, remove it
+	    numTasks = 1;
 
         // Get datatype for the receive
         MPI_Datatype data_type_rec = ResolveType<typename std::remove_all_extents<I>::type>();
@@ -334,9 +340,7 @@ void AddStage(int num_threads, int input_len, I* in, int in_count, O* out, int o
             }
 
             //result = (*func)(args...); // TODO call Farm pattern here
-            //result = Farm(2, out_count, *func, args...);
             result = Farm(num_threads, input_len, *func, args...);
-            //printf("rank %d -> Result calculated to be %d\n", rank, result);
 
             MPI_Isend(out, out_count, data_type_send, next, 0, MPI_COMM_WORLD, &pipeline_reqs[0]);
         }
@@ -347,6 +351,7 @@ void AddStage(int num_threads, int input_len, I* in, int in_count, O* out, int o
             MPI_Recv(in, in_count, data_type_rec, prev, 0, MPI_COMM_WORLD, &pipeline_stats[0]);
             printf("rank %d -> Wait over.\n", rank);
         }
+        // TODO Maybe add a Finish here to end other nodes
     }
     stage_counter++;
 }
