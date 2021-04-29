@@ -13,13 +13,12 @@ float result[MATRIX_SIZE/NODES][MATRIX_SIZE];
 
 
 int matrixmult(int start, int end, double additionalOption) {
-    //printf("In matrixmult with %d %d\n", start, end);
+    printf("In matrixmult with %d %d\n", start, end);
     //printf("additionalOption: %.2f\n", additionalOption);
     for (int i = start; i < end; i++) {
         for (int j = 0; j < MATRIX_SIZE; j++) {
             float c = 0.0f;
             for (int k = 0; k < MATRIX_SIZE; k++) {
-//                printf("sm[%d][%d]:%.2f + m2[%d][%d]:%.2f\n", i, k, submatrix[i][k], k, j, matrix2[k][j]);
                 c += submatrix[i][k] * matrix2[k][j];
             }
             result[i][j] = c;
@@ -52,7 +51,7 @@ int main() {
     Gather(result, MATRIX_SIZE * MATRIX_SIZE, matrix3);
     Finish();
 
-    //printf("First and last values in the matrix are: %.0f, %.0f\n", matrix3[0][0], matrix3[MATRIX_SIZE - 1][MATRIX_SIZE - 1]);
+    printf("First and last values in the matrix are: %.0f, %.0f\n", matrix3[0][0], matrix3[MATRIX_SIZE - 1][MATRIX_SIZE - 1]);
     /*for (int i = 0; i < MATRIX_SIZE; i++) {
         for (int j = 0; j < MATRIX_SIZE; j++) {
             printf("%.2f ", matrix3[i][j]);

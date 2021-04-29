@@ -314,7 +314,7 @@ int main(int argc, char** argv)
 	    //    otype[i],sptprice[i],strike[i],rate[i], volatility[i],otime[i]);
     }
 
-    printf("Size of data: %ld\n", SPLIT * (sizeof(OptionData) + sizeof(int)));
+    //printf("Size of data: %ld\n", SPLIT * (sizeof(OptionData) + sizeof(int)));
 
     // Call Farm pattern
     int res = Farm(2, numOptions, bs_thread);

@@ -20,15 +20,15 @@ int final_sum;
 int readImage(int start, int end, char** filenames) {
 	char* name = filenames[file_idx];
 	//file_idx++;  // TODO without this it will read only one file, with the threads will break it
-	printf("Mock reading image with name %s\n", name);
+	printf("Mock reading next image\n");
 	for (int i = start; i < end; i++) {
 		for (int j = 0; j < IMAGE_SIZE; j++) {
 			image[i][j] = i * IMAGE_SIZE + j;
-			printf("%d ", image[i][j]);
+			//printf("%d ", image[i][j]);
 		}
-		printf("\n");
+		//printf("\n");
 	}
-        usleep(0.1 * microsecond);//sleeps 
+        usleep(3.0 * microsecond);//sleeps 
 	return 1;
 }
 
@@ -37,9 +37,9 @@ int addOneToImage(int start, int end) {
 	for (int i = start; i < end; i++) {
 		for (int j = 0; j < IMAGE_SIZE; j++) {
 			stg1[i][j] += 1;
-			printf("%d ", stg1[i][j]);
+			//printf("%d ", stg1[i][j]);
 		}
-		printf("\n");
+		//printf("\n");
 	}
 	return 1;
 }
@@ -49,21 +49,23 @@ int addFourToImage(int start, int end) {
 	for (int i = start; i < end; i++) {
 		for (int j = 0; j < IMAGE_SIZE; j++) {
 			stg2[i][j] += 4;
-			printf("%d ", stg2[i][j]);
+			//printf("%d ", stg2[i][j]);
 		}
-		printf("\n");
+		//printf("\n");
 	}
-        usleep(0.5 * microsecond);//sleeps 
+        //usleep(0.5 * microsecond);//sleeps 
 	return 1;
 }
 
 int sumImage(int start, int end) {
+	final_sum = 0;
 	printf("sumImage\n");
 	for (int i = start; i < end; i++) {
 		for (int j = 0; j < IMAGE_SIZE; j++) {
 			final_sum += stg3[i][j];
 		}
 	}
+        usleep(1.5 * microsecond);//sleeps 
 	return 1;
 }
 
